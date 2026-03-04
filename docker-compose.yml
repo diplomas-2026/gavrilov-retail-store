@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: gavrilov-postgres
+    environment:
+      POSTGRES_DB: gavrilov_store
+      POSTGRES_USER: gavrilov
+      POSTGRES_PASSWORD: gavrilov
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gavrilov -d gavrilov_store"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./product-api
+    container_name: gavrilov-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/gavrilov_store
+      DB_USERNAME: gavrilov
+      DB_PASSWORD: gavrilov
+      APP_SEED_DIR: /app/project/seed-data
+      APP_USERS_FILE: /app/project/users.txt
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./product-api:/app/project
+
+volumes:
+  postgres_data:

@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gavrilov_store}
+    username: ${DB_USERNAME:gavrilov}
+    password: ${DB_PASSWORD:gavrilov}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:Z2F2cmlsb3Ytc3RvcmUtanJ3LXNlY3JldC1rZXktZm9yLWRldmVsb3BtZW50LTIwMjY=}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:180}
+
+app:
+  seed-dir: ${APP_SEED_DIR:seed-data}
+  users-file: ${APP_USERS_FILE:users.txt}

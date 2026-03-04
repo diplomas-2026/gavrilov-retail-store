@@ -1,0 +1,106 @@
+[
+  {
+    "sku": "MLK-0001",
+    "name": "Молоко 3.2% 900 мл",
+    "description": "Пастеризованное молоко от локального производителя",
+    "price": 109.90,
+    "oldPrice": 124.90,
+    "stockQty": 120,
+    "active": true,
+    "categorySlug": "molochnye-produkty",
+    "images": [
+      "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "MLK-0002",
+    "name": "Сыр Гауда 45% 300 г",
+    "description": "Полутвердый сыр с нежным сливочным вкусом",
+    "price": 279.00,
+    "oldPrice": 319.00,
+    "stockQty": 65,
+    "active": true,
+    "categorySlug": "molochnye-produkty",
+    "images": [
+      "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "BKL-0101",
+    "name": "Макароны из твердых сортов 450 г",
+    "description": "Итальянская форма, идеальны для пасты",
+    "price": 119.50,
+    "oldPrice": 139.00,
+    "stockQty": 150,
+    "active": true,
+    "categorySlug": "bakaleya",
+    "images": [
+      "https://images.unsplash.com/photo-1610725664285-7c57e6eeac3f?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "BKL-0102",
+    "name": "Рис длиннозерный 900 г",
+    "description": "Рассыпчатый рис для гарниров и плова",
+    "price": 145.00,
+    "oldPrice": null,
+    "stockQty": 90,
+    "active": true,
+    "categorySlug": "bakaleya",
+    "images": [
+      "https://images.unsplash.com/photo-1586201375761-83865001e17b?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "VF-0201",
+    "name": "Яблоки Гала 1 кг",
+    "description": "Сладкие хрустящие яблоки",
+    "price": 169.00,
+    "oldPrice": 189.00,
+    "stockQty": 70,
+    "active": true,
+    "categorySlug": "ovoshchi-i-frukty",
+    "images": [
+      "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "VF-0202",
+    "name": "Томаты сливовидные 1 кг",
+    "description": "Спелые томаты для салатов и горячих блюд",
+    "price": 209.00,
+    "oldPrice": null,
+    "stockQty": 45,
+    "active": true,
+    "categorySlug": "ovoshchi-i-frukty",
+    "images": [
+      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "DRK-0301",
+    "name": "Сок апельсиновый 1 л",
+    "description": "100% сок без добавления сахара",
+    "price": 185.00,
+    "oldPrice": 215.00,
+    "stockQty": 110,
+    "active": true,
+    "categorySlug": "napitki",
+    "images": [
+      "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "sku": "DRK-0302",
+    "name": "Кофе зерновой 1 кг",
+    "description": "Смесь арабики и робусты, средняя обжарка",
+    "price": 1299.00,
+    "oldPrice": 1490.00,
+    "stockQty": 25,
+    "active": true,
+    "categorySlug": "napitki",
+    "images": [
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80"
+    ]
+  }
+]

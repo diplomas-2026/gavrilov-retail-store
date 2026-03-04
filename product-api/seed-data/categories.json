@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Молочные продукты",
+    "slug": "molochnye-produkty",
+    "description": "Свежее молоко, сыры, творог, йогурты и масло",
+    "active": true
+  },
+  {
+    "name": "Бакалея",
+    "slug": "bakaleya",
+    "description": "Крупы, макароны, консервы, специи и соусы",
+    "active": true
+  },
+  {
+    "name": "Овощи и фрукты",
+    "slug": "ovoshchi-i-frukty",
+    "description": "Сезонные овощи, фрукты и зелень",
+    "active": true
+  },
+  {
+    "name": "Напитки",
+    "slug": "napitki",
+    "description": "Соки, вода, чай, кофе и прохладительные напитки",
+    "active": true
+  }
+]

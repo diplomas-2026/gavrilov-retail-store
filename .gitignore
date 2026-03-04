@@ -1,0 +1,25 @@
+.DS_Store
+**/.DS_Store
+
+# Java
+product-api/target/
+product-api/.m2/
+product-api/data/
+product-api/.mvn/
+product-api/.idea/
+product-api/users.txt
+
+# Node
+product-web/node_modules/
+product-web/dist/
+product-web/playwright-report/
+product-web/test-results/
+product-web/artifacts/screenshots/
+
+# IDE
+.vscode/
+.idea/
+
+# Env
+.env
+product-web/.env
