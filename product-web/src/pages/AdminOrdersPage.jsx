@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { formatCurrency, formatDate } from '../utils/format';
+import { getDeliveryTypeLabel, getOrderStatusLabel } from '../utils/orderLabels';
 
 const statuses = ['NEW', 'PROCESSING', 'COMPLETED', 'CANCELLED'];
 
@@ -40,6 +41,7 @@ export default function AdminOrdersPage() {
             <th>Дата</th>
             <th>Сумма</th>
             <th>Статус</th>
+            <th>Доставка</th>
             <th>Изменить</th>
           </tr>
         </thead>
@@ -50,7 +52,8 @@ export default function AdminOrdersPage() {
               <td>{order.customerName}</td>
               <td>{formatDate(order.createdAt)}</td>
               <td>{formatCurrency(order.totalAmount)}</td>
-              <td>{order.status}</td>
+              <td>{getOrderStatusLabel(order.status)}</td>
+              <td>{getDeliveryTypeLabel(order.deliveryType)}</td>
               <td>
                 <select
                   value={order.status}
@@ -59,7 +62,7 @@ export default function AdminOrdersPage() {
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
-                      {status}
+                      {getOrderStatusLabel(status)}
                     </option>
                   ))}
                 </select>

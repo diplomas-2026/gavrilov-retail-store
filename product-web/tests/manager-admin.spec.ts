@@ -34,6 +34,7 @@ test('manager: доступ к админке без управления пол
 
   await page.goto('/admin/users');
   await expect(page.getByTestId('forbidden-page')).toBeVisible();
+  await saveScreenshot(page, '09a-manager-forbidden-users-page.png');
 });
 
 test('admin: управление пользователями доступно', async ({ page }) => {
@@ -44,6 +45,10 @@ test('admin: управление пользователями доступно'
   await page.goto('/admin/users');
   await expect(page.getByTestId('admin-users-page')).toBeVisible();
   await saveScreenshot(page, '10-admin-users-page.png');
+
+  await page.goto('/admin/pickup-points');
+  await expect(page.getByTestId('admin-pickup-points-page')).toBeVisible();
+  await saveScreenshot(page, '11-admin-pickup-points-page.png');
 });
 
 test('customer: запрет на админ-страницы', async ({ page }) => {
@@ -53,4 +58,5 @@ test('customer: запрет на админ-страницы', async ({ page })
   await loginAs(page, customer.email, customer.password);
   await page.goto('/admin');
   await expect(page.getByTestId('forbidden-page')).toBeVisible();
+  await saveScreenshot(page, '11a-customer-forbidden-admin-page.png');
 });

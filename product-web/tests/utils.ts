@@ -45,7 +45,20 @@ export async function loginAs(page: Page, email: string, password: string) {
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', password);
   await page.getByTestId('login-submit').click();
+  await page.waitForFunction(() => Boolean(window.localStorage.getItem('token')));
+  await page.waitForLoadState('networkidle');
+  if (!(await page.getByTestId('logout-button').isVisible())) {
+    await page.reload();
+  }
   await expect(page.getByTestId('logout-button')).toBeVisible();
+}
+
+export async function logoutIfNeeded(page: Page) {
+  const button = page.getByTestId('logout-button');
+  if (await button.isVisible()) {
+    await button.click();
+    await expect(page.getByTestId('login-page')).toBeVisible();
+  }
 }
 
 export async function saveScreenshot(page: Page, filename: string) {

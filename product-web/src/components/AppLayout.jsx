@@ -26,6 +26,7 @@ export default function AppLayout() {
 
         <nav className="nav">
           <NavLink to="/">Каталог</NavLink>
+          <NavLink to="/pickup-points">Пункты выдачи</NavLink>
           {isCustomer && <NavLink to="/cart">Корзина ({items.length})</NavLink>}
           {isCustomer && <NavLink to="/profile/orders">Мои заказы</NavLink>}
           {canManage && <NavLink to="/admin">Управление</NavLink>}

@@ -148,8 +148,9 @@ h3 {
 }
 
 .product-image-wrap {
-  height: 170px;
+  height: 190px;
   overflow: hidden;
+  background: #e7edf5;
 }
 
 .product-image,
@@ -157,6 +158,7 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .product-content {
@@ -284,12 +286,221 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.my-orders-grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
 .order-card,
 .admin-link {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.9rem;
+}
+
+.order-card h3 {
+  font-size: 1.1rem;
+}
+
+.order-card {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  border-color: #b6c9e0;
+}
+
+.order-card-open {
+  border-color: #7ca3ce;
+  box-shadow: 0 0 0 2px rgba(58, 139, 214, 0.12);
+}
+
+.order-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-new,
+.status-processing {
+  background: #e8f2ff;
+  color: #1f4f8a;
+}
+
+.status-completed {
+  background: #e7f8ee;
+  color: #157a4c;
+}
+
+.status-cancelled {
+  background: #ffe9ec;
+  color: #9b2533;
+}
+
+.order-items-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.4rem 0 0.55rem;
+}
+
+.order-meta-grid {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.order-details-line {
+  min-height: 3.1rem;
+  margin-top: 0.45rem;
+}
+
+.order-items-title {
+  margin: 0.2rem 0 0.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #32465f;
+}
+
+.order-items-list {
+  margin-top: 0.15rem;
+}
+
+.order-item-chip {
+  background: #eaf0f8;
+  color: #294766;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.order-item-chip-wide {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.order-total {
+  margin-top: 0.4rem;
+}
+
+.order-link-hint {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: #57749a;
+}
+
+.order-details-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.order-details-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.order-items-detailed-stack {
+  padding-left: 0;
+  list-style: none;
+}
+
+.order-details-block {
+  margin-top: 0.55rem;
+  border-top: 1px dashed #c8d4e4;
+  padding-top: 0.55rem;
+}
+
+.order-items-detailed {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.order-items-detailed li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.other-orders-block {
+  margin-top: 0.9rem;
+}
+
+.order-link-chip {
+  border: 1px solid var(--border);
+}
+
+.pickup-map-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.pickup-map-points-inline {
+  margin-top: 0.7rem;
+}
+
+.order-map-chip {
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.order-map-chip-active {
+  background: #dcebf8;
+  border-color: #88aed6;
+  color: #1d4066;
+}
+
+.customer-orders-list {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.customer-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  background: #fff;
+}
+
+.customer-order-row:hover {
+  border-color: #b6c9e0;
+}
+
+.customer-order-row-active {
+  border-color: #7ca3ce;
+  background: #f4f8fd;
+}
+
+.customer-order-row-right {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
 }
 
 .error-box,
@@ -315,6 +526,110 @@ textarea {
 .status-card {
   background: #f0f4fa;
   border: 1px dashed #b8c4d6;
+}
+
+.empty-cart-card {
+  padding: 1.2rem 1.5rem;
+}
+
+.empty-cart-card p {
+  margin: 0 0 0.8rem;
+  font-size: 1.05rem;
+}
+
+.empty-cart-actions {
+  display: flex;
+}
+
+.auth-switch-line {
+  margin-top: 0.9rem;
+}
+
+.pickup-points-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.pickup-point-card,
+.pickup-inline-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem;
+}
+
+.pickup-point-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pickup-point-card:hover {
+  transform: translateY(-2px);
+  border-color: #afc2da;
+}
+
+.pickup-point-card-active {
+  border-color: #3a8bd6;
+  box-shadow: 0 0 0 2px rgba(58, 139, 214, 0.15);
+}
+
+.pickup-point-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pickup-provider-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 0.25rem;
+}
+
+.pickup-map {
+  width: 100%;
+  height: 240px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 0.45rem;
+}
+
+.pickup-map-section {
+  margin-top: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem;
+}
+
+.pickup-map-large {
+  height: 360px;
+}
+
+.inline-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.45rem;
 }
 
 .auth-page {
@@ -347,5 +662,18 @@ textarea {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+  }
+
+  .pickup-map-section-head {
+    flex-direction: column;
+  }
+
+  .customer-order-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .customer-order-row-right {
+    justify-items: start;
   }
 }

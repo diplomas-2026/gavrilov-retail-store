@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
@@ -7,8 +7,8 @@ export default function LoginPage() {
   const location = useLocation();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('customer@gavrilov.local');
-  const [password, setPassword] = useState('Customer123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -63,6 +63,9 @@ export default function LoginPage() {
             {loading ? 'Входим...' : 'Войти'}
           </button>
         </form>
+        <p className="muted auth-switch-line">
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </p>
       </div>
     </div>
   );

@@ -28,6 +28,10 @@ public class OrderEntity {
     @JoinColumn(name = "customer_id")
     private UserEntity customer;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pickup_point_id")
+    private PickupPointEntity pickupPoint;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OrderStatus status = OrderStatus.NEW;
@@ -65,6 +69,14 @@ public class OrderEntity {
 
     public void setCustomer(UserEntity customer) {
         this.customer = customer;
+    }
+
+    public PickupPointEntity getPickupPoint() {
+        return pickupPoint;
+    }
+
+    public void setPickupPoint(PickupPointEntity pickupPoint) {
+        this.pickupPoint = pickupPoint;
     }
 
     public OrderStatus getStatus() {

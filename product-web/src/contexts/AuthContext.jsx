@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
         return;
       }
 
+      setLoading(true);
       try {
         const profile = await api.me();
         setUser(profile);
@@ -31,11 +32,29 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const login = async (email, password) => {
-    const response = await api.login({ email, password });
-    localStorage.setItem('token', response.token);
-    setToken(response.token);
-    setUser(response.user);
-    return response.user;
+    setLoading(true);
+    try {
+      const response = await api.login({ email, password });
+      localStorage.setItem('token', response.token);
+      setToken(response.token);
+      setUser(response.user);
+      return response.user;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (fullName, email, password) => {
+    setLoading(true);
+    try {
+      const response = await api.register({ fullName, email, password });
+      localStorage.setItem('token', response.token);
+      setToken(response.token);
+      setUser(response.user);
+      return response.user;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
@@ -51,6 +70,7 @@ export function AuthProvider({ children }) {
       loading,
       isAuthenticated: !!user,
       login,
+      register,
       logout
     }),
     [user, token, loading]

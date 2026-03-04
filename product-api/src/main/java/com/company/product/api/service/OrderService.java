@@ -11,12 +11,14 @@ import com.company.product.api.entity.DeliveryType;
 import com.company.product.api.entity.OrderEntity;
 import com.company.product.api.entity.OrderItemEntity;
 import com.company.product.api.entity.OrderStatus;
+import com.company.product.api.entity.PickupPointEntity;
 import com.company.product.api.entity.ProductEntity;
 import com.company.product.api.entity.UserEntity;
 import com.company.product.api.exception.BadRequestException;
 import com.company.product.api.exception.NotFoundException;
 import com.company.product.api.repository.OrderItemRepository;
 import com.company.product.api.repository.OrderRepository;
+import com.company.product.api.repository.PickupPointRepository;
 import com.company.product.api.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -31,13 +33,16 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PickupPointRepository pickupPointRepository;
 
     public OrderService(ProductRepository productRepository,
                         OrderRepository orderRepository,
-                        OrderItemRepository orderItemRepository) {
+                        OrderItemRepository orderItemRepository,
+                        PickupPointRepository pickupPointRepository) {
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.pickupPointRepository = pickupPointRepository;
     }
 
     public CartPreviewResponse preview(CartPreviewRequest request) {
@@ -49,14 +54,30 @@ public class OrderService {
         if (request.deliveryType() == DeliveryType.COURIER && (request.deliveryAddress() == null || request.deliveryAddress().isBlank())) {
             throw new BadRequestException("Для курьерской доставки укажите адрес");
         }
+        if (request.deliveryType() == DeliveryType.PICKUP && request.pickupPointId() == null) {
+            throw new BadRequestException("Для самовывоза выберите пункт выдачи");
+        }
 
         CartPreviewResponse preview = buildPreview(request.items());
+        PickupPointEntity pickupPoint = null;
+        if (request.deliveryType() == DeliveryType.PICKUP) {
+            pickupPoint = pickupPointRepository.findById(request.pickupPointId())
+                    .orElseThrow(() -> new NotFoundException("Пункт выдачи не найден"));
+            if (!pickupPoint.isActive()) {
+                throw new BadRequestException("Выбранный пункт выдачи недоступен");
+            }
+        }
 
         OrderEntity order = new OrderEntity();
         order.setCustomer(customer);
         order.setStatus(OrderStatus.NEW);
         order.setDeliveryType(request.deliveryType());
-        order.setDeliveryAddress(request.deliveryAddress());
+        order.setPickupPoint(pickupPoint);
+        if (request.deliveryType() == DeliveryType.PICKUP) {
+            order.setDeliveryAddress(pickupPoint.getAddress());
+        } else {
+            order.setDeliveryAddress(request.deliveryAddress());
+        }
         order.setComment(request.comment());
         order.setTotalAmount(preview.totalAmount());
 
@@ -84,6 +105,15 @@ public class OrderService {
         return orderRepository.findByCustomerOrderByCreatedAtDesc(customer).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    public OrderResponse getMyOrder(UserEntity customer, Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+        if (!order.getCustomer().getId().equals(customer.getId())) {
+            throw new NotFoundException("Заказ не найден");
+        }
+        return toResponse(order);
     }
 
     public List<OrderResponse> getAllOrders() {
@@ -144,6 +174,9 @@ public class OrderService {
                 order.getStatus(),
                 order.getTotalAmount(),
                 order.getDeliveryType(),
+                order.getPickupPoint() != null ? order.getPickupPoint().getId() : null,
+                order.getPickupPoint() != null ? order.getPickupPoint().getName() : null,
+                order.getPickupPoint() != null ? order.getPickupPoint().getProvider().name() : null,
                 order.getDeliveryAddress(),
                 order.getComment(),
                 order.getCreatedAt(),

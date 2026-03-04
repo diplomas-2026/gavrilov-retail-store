@@ -1,0 +1,46 @@
+[
+  {
+    "provider": "RUSSIAN_POST",
+    "name": "Почта России — Самара Центр",
+    "address": "г. Самара, ул. Ленинградская, 24",
+    "phone": "+7 (800) 100-00-00",
+    "workHours": "Пн-Вс: 09:00-20:00",
+    "latitude": 53.19192,
+    "longitude": 50.10176,
+    "logoUrl": "http://localhost:8080/images/providers/russian-post.svg",
+    "active": true
+  },
+  {
+    "provider": "CDEK",
+    "name": "СДЭК — ПВЗ Самара Победы",
+    "address": "г. Самара, ул. Победы, 98",
+    "phone": "+7 (846) 222-10-10",
+    "workHours": "Пн-Сб: 10:00-21:00",
+    "latitude": 53.20846,
+    "longitude": 50.23802,
+    "logoUrl": "http://localhost:8080/images/providers/cdek.svg",
+    "active": true
+  },
+  {
+    "provider": "YANDEX_MARKET",
+    "name": "Яндекс Маркет — ПВЗ Самара Гагарина",
+    "address": "г. Самара, ул. Гагарина, 99",
+    "phone": "+7 (846) 200-30-40",
+    "workHours": "Пн-Вс: 10:00-22:00",
+    "latitude": 53.20457,
+    "longitude": 50.19295,
+    "logoUrl": "http://localhost:8080/images/providers/yandex-market.svg",
+    "active": true
+  },
+  {
+    "provider": "BOXBERRY",
+    "name": "Boxberry — ПВЗ Самара Аэродромная",
+    "address": "г. Самара, ул. Аэродромная, 47А",
+    "phone": "+7 (846) 277-77-55",
+    "workHours": "Пн-Пт: 09:00-19:00, Сб: 10:00-16:00",
+    "latitude": 53.18733,
+    "longitude": 50.19618,
+    "logoUrl": "http://localhost:8080/images/providers/boxberry.png",
+    "active": true
+  }
+]

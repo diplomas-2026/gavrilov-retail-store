@@ -5,6 +5,8 @@ import com.company.product.api.entity.DeliveryType;
 import com.company.product.api.entity.OrderEntity;
 import com.company.product.api.entity.OrderItemEntity;
 import com.company.product.api.entity.OrderStatus;
+import com.company.product.api.entity.PickupPointEntity;
+import com.company.product.api.entity.PickupProvider;
 import com.company.product.api.entity.ProductEntity;
 import com.company.product.api.entity.ProductImageEntity;
 import com.company.product.api.entity.Role;
@@ -12,6 +14,7 @@ import com.company.product.api.entity.UserEntity;
 import com.company.product.api.repository.CategoryRepository;
 import com.company.product.api.repository.OrderItemRepository;
 import com.company.product.api.repository.OrderRepository;
+import com.company.product.api.repository.PickupPointRepository;
 import com.company.product.api.repository.ProductImageRepository;
 import com.company.product.api.repository.ProductRepository;
 import com.company.product.api.repository.UserRepository;
@@ -49,6 +52,7 @@ public class DevDataInitializer implements CommandLineRunner {
     private final ProductImageRepository productImageRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PickupPointRepository pickupPointRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
 
@@ -64,6 +68,7 @@ public class DevDataInitializer implements CommandLineRunner {
                               ProductImageRepository productImageRepository,
                               OrderRepository orderRepository,
                               OrderItemRepository orderItemRepository,
+                              PickupPointRepository pickupPointRepository,
                               PasswordEncoder passwordEncoder,
                               ObjectMapper objectMapper) {
         this.userRepository = userRepository;
@@ -72,6 +77,7 @@ public class DevDataInitializer implements CommandLineRunner {
         this.productImageRepository = productImageRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.pickupPointRepository = pickupPointRepository;
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
     }
@@ -85,8 +91,11 @@ public class DevDataInitializer implements CommandLineRunner {
         });
         List<SeedProduct> products = readSeed("products.json", new TypeReference<>() {
         });
+        List<SeedPickupPoint> pickupPoints = readSeed("pickup-points.json", new TypeReference<>() {
+        });
         upsertCategories(categories);
         upsertProducts(products);
+        upsertPickupPoints(pickupPoints);
         createDemoOrderIfMissing();
         log.info("Test users and seed data initialized");
     }
@@ -212,6 +221,24 @@ public class DevDataInitializer implements CommandLineRunner {
         }
     }
 
+    private void upsertPickupPoints(List<SeedPickupPoint> pickupPoints) {
+        for (SeedPickupPoint seedPoint : pickupPoints) {
+            PickupPointEntity point = pickupPointRepository
+                    .findByProviderAndNameIgnoreCase(seedPoint.provider(), seedPoint.name())
+                    .orElseGet(PickupPointEntity::new);
+            point.setProvider(seedPoint.provider());
+            point.setName(seedPoint.name());
+            point.setAddress(seedPoint.address());
+            point.setPhone(seedPoint.phone());
+            point.setWorkHours(seedPoint.workHours());
+            point.setLatitude(seedPoint.latitude());
+            point.setLongitude(seedPoint.longitude());
+            point.setLogoUrl(seedPoint.logoUrl());
+            point.setActive(seedPoint.active());
+            pickupPointRepository.save(point);
+        }
+    }
+
     private <T> List<T> readSeed(String filename, TypeReference<List<T>> typeReference) throws IOException {
         Path path = Path.of(seedDir, filename);
         if (!Files.exists(path)) {
@@ -235,5 +262,16 @@ public class DevDataInitializer implements CommandLineRunner {
                                boolean active,
                                String categorySlug,
                                List<String> images) {
+    }
+
+    private record SeedPickupPoint(PickupProvider provider,
+                                   String name,
+                                   String address,
+                                   String phone,
+                                   String workHours,
+                                   Double latitude,
+                                   Double longitude,
+                                   String logoUrl,
+                                   boolean active) {
     }
 }

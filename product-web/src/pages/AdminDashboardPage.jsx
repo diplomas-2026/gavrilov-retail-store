@@ -20,6 +20,11 @@ export default function AdminDashboardPage() {
           Заказы
         </Link>
         {isAdmin && (
+          <Link className="admin-link" to="/admin/pickup-points">
+            Пункты выдачи
+          </Link>
+        )}
+        {isAdmin && (
           <Link className="admin-link" to="/admin/users">
             Пользователи и роли
           </Link>

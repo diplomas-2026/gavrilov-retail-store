@@ -50,6 +50,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getMyOrders(customer));
     }
 
+    @GetMapping("/orders/my/{id}")
+    public ResponseEntity<OrderResponse> myOrderById(@PathVariable Long id) {
+        UserEntity customer = currentUserService.getCurrentUser();
+        return ResponseEntity.ok(orderService.getMyOrder(customer, id));
+    }
+
     @GetMapping("/orders")
     public ResponseEntity<List<OrderResponse>> allOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());

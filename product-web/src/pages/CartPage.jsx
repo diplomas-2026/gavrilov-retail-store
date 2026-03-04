@@ -9,10 +9,10 @@ export default function CartPage() {
     <section className="panel" data-testid="cart-page">
       <h1>Корзина</h1>
       {items.length === 0 ? (
-        <div className="status-card">
-          Корзина пуста. Перейдите в каталог и добавьте товары.
-          <div>
-            <Link className="primary-btn" to="/">
+        <div className="status-card empty-cart-card">
+          <p>Корзина пуста. Перейдите в каталог и добавьте товары.</p>
+          <div className="empty-cart-actions">
+            <Link className="primary-btn" to="/" data-testid="go-catalog-empty-cart">
               К каталогу
             </Link>
           </div>

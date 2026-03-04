@@ -37,6 +37,7 @@ async function request(path, options = {}) {
 
 export const api = {
   login: (payload) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  register: (payload) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
   me: () => request('/api/auth/me'),
 
   getCategories: () => request('/api/categories'),
@@ -53,8 +54,15 @@ export const api = {
   previewCart: (payload) => request('/api/cart/preview', { method: 'POST', body: JSON.stringify(payload) }),
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: JSON.stringify(payload) }),
   getMyOrders: () => request('/api/orders/my'),
+  getMyOrder: (id) => request(`/api/orders/my/${id}`),
   getOrders: () => request('/api/orders'),
   updateOrderStatus: (id, payload) => request(`/api/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(payload) }),
+
+  getPickupPoints: () => request('/api/pickup-points'),
+  getPickupPointsAdmin: () => request('/api/pickup-points/admin'),
+  createPickupPoint: (payload) => request('/api/pickup-points', { method: 'POST', body: JSON.stringify(payload) }),
+  updatePickupPoint: (id, payload) => request(`/api/pickup-points/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  deletePickupPoint: (id) => request(`/api/pickup-points/${id}`, { method: 'DELETE' }),
 
   getUsers: () => request('/api/users'),
   updateUserRole: (id, payload) => request(`/api/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) })

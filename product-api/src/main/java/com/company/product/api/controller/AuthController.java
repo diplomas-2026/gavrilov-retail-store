@@ -2,6 +2,7 @@ package com.company.product.api.controller;
 
 import com.company.product.api.dto.auth.AuthResponse;
 import com.company.product.api.dto.auth.LoginRequest;
+import com.company.product.api.dto.auth.RegisterRequest;
 import com.company.product.api.dto.user.UserProfileResponse;
 import com.company.product.api.service.AuthService;
 import com.company.product.api.service.CurrentUserService;
@@ -28,6 +29,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @GetMapping("/me")
