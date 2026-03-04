@@ -7,7 +7,6 @@ product-api/.m2/
 product-api/data/
 product-api/.mvn/
 product-api/.idea/
-product-api/users.txt
 
 # Node
 product-web/node_modules/

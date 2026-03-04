@@ -1,0 +1,3 @@
+email=admin@gavrilov.local; password=Admin123!; role=ADMIN
+email=manager@gavrilov.local; password=Manager123!; role=MANAGER
+email=customer@gavrilov.local; password=Customer123!; role=CUSTOMER
