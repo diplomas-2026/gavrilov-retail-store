@@ -127,7 +127,7 @@ public class OrderService {
     }
 
     private OrderResponse toResponse(OrderEntity order) {
-        List<OrderItemResponse> items = orderItemRepository.findByOrder(order).stream()
+        List<OrderItemResponse> items = orderItemRepository.findByOrderWithProduct(order).stream()
                 .map(item -> new OrderItemResponse(
                         item.getProduct().getId(),
                         item.getProduct().getName(),

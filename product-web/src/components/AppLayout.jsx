@@ -9,6 +9,13 @@ export default function AppLayout() {
   const canManage = user && ['ADMIN', 'MANAGER'].includes(user.role);
   const isAdmin = user?.role === 'ADMIN';
   const isCustomer = user?.role === 'CUSTOMER';
+  const roleLabel = user?.role === 'ADMIN'
+    ? 'Администратор'
+    : user?.role === 'MANAGER'
+      ? 'Менеджер'
+      : user?.role === 'CUSTOMER'
+        ? 'Покупатель'
+        : user?.role;
 
   return (
     <div className="app-shell">
@@ -30,7 +37,7 @@ export default function AppLayout() {
             <>
               <div>
                 <strong>{user.fullName}</strong>
-                <div className="role-tag">Роль: {user.role}</div>
+                <div className="role-tag">Роль: {roleLabel}</div>
               </div>
               <button className="ghost-btn" onClick={logout} data-testid="logout-button">
                 Выйти

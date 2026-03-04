@@ -105,8 +105,8 @@ h3 {
   color: white;
   box-shadow: var(--shadow);
   background:
-    linear-gradient(135deg, rgba(18, 98, 97, 0.96), rgba(11, 127, 109, 0.96)),
-    url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80') center/cover;
+    linear-gradient(135deg, rgba(60, 71, 90, 0.88), rgba(34, 44, 59, 0.9)),
+    url('http://localhost:8080/images/products/milk.jpg') center/cover;
 }
 
 .kicker {

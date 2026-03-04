@@ -44,9 +44,9 @@ export default function HomePage() {
       <div className="hero-banner">
         <div>
           <p className="kicker">Розничный магазин</p>
-          <h1>Свежие продукты каждый день</h1>
+          <h1>Мебель, свет и товары для дома</h1>
           <p>
-            Онлайн-витрина ИП Гаврилова Т.В. с актуальными ценами, остатками и быстрым оформлением заказов.
+            Онлайн-витрина ИП Гавриловой Т.В. с каталогом мебели, осветительных приборов и бытовых изделий.
           </p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function HomePage() {
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Например, молоко"
+            placeholder="Например, диван"
           />
         </label>
         <label>

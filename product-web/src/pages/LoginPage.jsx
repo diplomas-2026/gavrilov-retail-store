@@ -38,7 +38,6 @@ export default function LoginPage() {
     <div className="auth-page" data-testid="login-page">
       <div className="auth-card">
         <h1>Вход в систему</h1>
-        <p className="muted">Используйте учетные данные из файла product-api/users.txt</p>
         <form onSubmit={onSubmit} className="stack-form">
           <label>
             Email
