@@ -188,12 +188,19 @@ public class DevDataInitializer implements CommandLineRunner {
         if (activeProducts.isEmpty()) {
             return;
         }
+        PickupPointEntity pickupPoint = pickupPointRepository.findByActiveTrueOrderByProviderAscNameAsc().stream()
+                .findFirst()
+                .orElse(null);
+        if (pickupPoint == null) {
+            return;
+        }
 
         OrderEntity order = new OrderEntity();
         order.setCustomer(customer);
         order.setStatus(OrderStatus.NEW);
-        order.setDeliveryType(DeliveryType.COURIER);
-        order.setDeliveryAddress("г. Самара, ул. Молодогвардейская, 120");
+        order.setDeliveryType(DeliveryType.PICKUP);
+        order.setPickupPoint(pickupPoint);
+        order.setDeliveryAddress(pickupPoint.getAddress());
         order.setComment("Демо-заказ для проверки интерфейса");
         order.setCreatedAt(OffsetDateTime.now().minusDays(1));
 

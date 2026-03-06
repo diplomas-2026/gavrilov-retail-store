@@ -30,8 +30,7 @@ test('customer: каталог -> корзина -> заказ', async ({ page }
 
   await page.getByTestId('go-checkout').click();
   await expect(page.getByTestId('checkout-page')).toBeVisible();
-  await saveScreenshot(page, '04a-checkout-courier-state.png');
-  await page.selectOption('select', 'PICKUP');
+  await saveScreenshot(page, '04a-checkout-pickup-default-state.png');
   await expect(page.getByTestId('pickup-point-select')).toBeVisible();
   await expect(page.getByTestId('pickup-point-card')).toBeVisible();
   await saveScreenshot(page, '04-checkout-page.png');

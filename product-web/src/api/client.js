@@ -51,6 +51,10 @@ export const api = {
   updateProduct: (id, payload) => request(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
   deleteProduct: (id) => request(`/api/products/${id}`, { method: 'DELETE' }),
 
+  getCart: () => request('/api/cart'),
+  upsertCartItem: (productId, qty) => request(`/api/cart/items/${productId}`, { method: 'PUT', body: JSON.stringify({ qty }) }),
+  removeCartItem: (productId) => request(`/api/cart/items/${productId}`, { method: 'DELETE' }),
+  clearCart: () => request('/api/cart', { method: 'DELETE' }),
   previewCart: (payload) => request('/api/cart/preview', { method: 'POST', body: JSON.stringify(payload) }),
   createOrder: (payload) => request('/api/orders', { method: 'POST', body: JSON.stringify(payload) }),
   getMyOrders: () => request('/api/orders/my'),

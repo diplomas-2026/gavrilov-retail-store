@@ -30,7 +30,7 @@ services:
       APP_SEED_DIR: /app/project/seed-data
       APP_USERS_FILE: /app/project/users.txt
     ports:
-      - "8080:8080"
+      - "8081:8080"
     volumes:
       - ./product-api:/app/project
 

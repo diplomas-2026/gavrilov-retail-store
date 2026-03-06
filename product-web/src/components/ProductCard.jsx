@@ -5,8 +5,11 @@ import { useCart } from '../contexts/CartContext';
 
 export default function ProductCard({ product }) {
   const { user } = useAuth();
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQty } = useCart();
   const canBuy = user?.role === 'CUSTOMER';
+  const itemInCart = items.find((item) => item.productId === product.id);
+  const qtyInCart = itemInCart?.qty || 0;
+  const canIncrease = qtyInCart < Number(product.stockQty);
 
   return (
     <article className="product-card" data-testid="product-card">
@@ -22,10 +25,32 @@ export default function ProductCard({ product }) {
           <Link className="ghost-btn" to={`/products/${product.id}`}>
             Подробнее
           </Link>
-          {canBuy && (
+          {canBuy && qtyInCart === 0 && (
             <button className="primary-btn" onClick={() => addToCart(product)} data-testid={`add-to-cart-${product.id}`}>
               В корзину
             </button>
+          )}
+          {canBuy && qtyInCart > 0 && (
+            <div className="qty-control" data-testid={`qty-control-${product.id}`}>
+              <button
+                type="button"
+                className="ghost-btn qty-btn"
+                onClick={() => updateQty(product.id, qtyInCart - 1)}
+                data-testid={`decrease-cart-item-${product.id}`}
+              >
+                -
+              </button>
+              <span className="qty-value" data-testid={`cart-qty-${product.id}`}>{qtyInCart}</span>
+              <button
+                type="button"
+                className="primary-btn qty-btn"
+                onClick={() => addToCart(product)}
+                disabled={!canIncrease}
+                data-testid={`increase-cart-item-${product.id}`}
+              >
+                +
+              </button>
+            </div>
           )}
         </div>
       </div>
