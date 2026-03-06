@@ -41,8 +41,16 @@ jobs:
           chmod 700 ~/.ssh
           # Supports both raw multiline private key and base64-encoded key in secret.
           printf '%b' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
-          if ! ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
-            printf '%s' "$DEPLOY_SSH_KEY" | base64 -d > ~/.ssh/id_deploy
+          if ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
+            echo "DEPLOY_SSH_KEY parsed as raw private key"
+          else
+            if printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n' | base64 -d > ~/.ssh/id_deploy 2>/dev/null \
+              && ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
+              echo "DEPLOY_SSH_KEY parsed as base64 private key"
+            else
+              echo "DEPLOY_SSH_KEY is invalid. Save a valid private key (raw or base64)." >&2
+              exit 1
+            fi
           fi
           chmod 600 ~/.ssh/id_deploy
           ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null
