@@ -32,28 +32,17 @@ jobs:
           npm ci
           npm run build
 
-      - name: Setup SSH
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add deploy host to known_hosts
         env:
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          # Supports both raw multiline private key and base64-encoded key in secret.
-          printf '%b' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
-          if ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
-            echo "DEPLOY_SSH_KEY parsed as raw private key"
-          else
-            if printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n' | base64 -d > ~/.ssh/id_deploy 2>/dev/null \
-              && ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1; then
-              echo "DEPLOY_SSH_KEY parsed as base64 private key"
-            else
-              echo "DEPLOY_SSH_KEY is invalid. Save a valid private key (raw or base64)." >&2
-              exit 1
-            fi
-          fi
-          chmod 600 ~/.ssh/id_deploy
-          ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
       - name: Upload frontend build
@@ -62,8 +51,8 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_WEB_DIR: ${{ secrets.DEPLOY_WEB_DIR }}
         run: |
-          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_WEB_DIR' && find '$DEPLOY_WEB_DIR' -mindepth 1 -maxdepth 1 -exec rm -rf {} +"
-          scp -i ~/.ssh/id_deploy -r product-web/build/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_WEB_DIR/"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_WEB_DIR' && find '$DEPLOY_WEB_DIR' -mindepth 1 -maxdepth 1 -exec rm -rf {} +"
+          scp -r product-web/build/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_WEB_DIR/"
 
       - name: Deploy API on server
         env:
@@ -71,4 +60,4 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
         run: |
-          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && git checkout main && git pull --ff-only origin main && docker compose up -d --build"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && git checkout main && git pull --ff-only origin main && docker compose up -d --build"
