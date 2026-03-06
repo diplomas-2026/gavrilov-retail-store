@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../utils/format';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { resolveMediaUrl } from '../utils/media';
 
 export default function ProductCard({ product }) {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="product-card" data-testid="product-card">
       <div className="product-image-wrap">
-        <img src={product.images?.[0]} alt={product.name} className="product-image" />
+        <img src={resolveMediaUrl(product.images?.[0])} alt={product.name} className="product-image" />
       </div>
       <div className="product-content">
         <h3>{product.name}</h3>

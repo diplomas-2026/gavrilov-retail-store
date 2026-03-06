@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useCart } from '../contexts/CartContext';
 import { formatCurrency } from '../utils/format';
 import { getPickupProviderLabel } from '../utils/orderLabels';
+import { resolveMediaUrl } from '../utils/media';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -113,7 +114,7 @@ export default function CheckoutPage() {
           <div className="pickup-inline-card" data-testid="pickup-point-card">
             <div className="pickup-point-head">
               {selectedPickupPoint.logoUrl ? (
-                <img src={selectedPickupPoint.logoUrl} alt={selectedPickupPoint.provider} className="pickup-provider-logo" />
+                <img src={resolveMediaUrl(selectedPickupPoint.logoUrl)} alt={selectedPickupPoint.provider} className="pickup-provider-logo" />
               ) : null}
               <div>
                 <strong>{selectedPickupPoint.name}</strong>

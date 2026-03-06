@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { formatCurrency } from '../utils/format';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { resolveMediaUrl } from '../utils/media';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -33,7 +34,7 @@ export default function ProductDetailsPage() {
 
   return (
     <section className="panel details-page" data-testid="product-details-page">
-      <img src={product.images?.[0]} alt={product.name} className="details-image" />
+      <img src={resolveMediaUrl(product.images?.[0])} alt={product.name} className="details-image" />
       <div>
         <p className="kicker">{product.categoryName}</p>
         <h1>{product.name}</h1>

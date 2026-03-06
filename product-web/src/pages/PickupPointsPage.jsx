@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { getPickupProviderLabel } from '../utils/orderLabels';
+import { resolveMediaUrl } from '../utils/media';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -51,7 +52,7 @@ export default function PickupPointsPage() {
             }}
           >
             <div className="pickup-point-head">
-              {point.logoUrl ? <img src={point.logoUrl} alt={point.provider} className="pickup-provider-logo" /> : null}
+              {point.logoUrl ? <img src={resolveMediaUrl(point.logoUrl)} alt={point.provider} className="pickup-provider-logo" /> : null}
               <div>
                 <h3>{point.name}</h3>
                 <p className="muted">{getPickupProviderLabel(point.provider)}</p>

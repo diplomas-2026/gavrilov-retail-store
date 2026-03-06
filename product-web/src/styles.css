@@ -106,7 +106,7 @@ h3 {
   box-shadow: var(--shadow);
   background:
     linear-gradient(135deg, rgba(60, 71, 90, 0.88), rgba(34, 44, 59, 0.9)),
-    url('http://localhost:8080/images/products/milk.jpg') center/cover;
+    url('/images/products/milk.jpg') center/cover;
 }
 
 .kicker {
