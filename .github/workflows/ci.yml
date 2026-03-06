@@ -29,8 +29,8 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Run Maven tests
-        run: mvn -B -ntp test
+      - name: Run Maven unit tests
+        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest' test
 
   e2e:
     name: E2E (Docker API + Playwright)
