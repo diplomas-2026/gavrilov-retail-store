@@ -51,8 +51,12 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_WEB_DIR: ${{ secrets.DEPLOY_WEB_DIR }}
         run: |
+          FRONTEND_DIR="product-web/dist"
+          if [ -d "product-web/build" ]; then
+            FRONTEND_DIR="product-web/build"
+          fi
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_WEB_DIR' && find '$DEPLOY_WEB_DIR' -mindepth 1 -maxdepth 1 -exec rm -rf {} +"
-          scp -r product-web/build/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_WEB_DIR/"
+          scp -r "$FRONTEND_DIR"/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_WEB_DIR/"
 
       - name: Deploy API on server
         env:
