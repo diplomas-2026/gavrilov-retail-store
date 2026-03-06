@@ -78,3 +78,24 @@ npx playwright test
 Скриншоты сохраняются в:
 
 `product-web/artifacts/screenshots/`
+
+## CI/CD (GitHub Actions)
+
+Автодеплой настроен через workflow `.github/workflows/deploy.yml`.
+
+Триггеры:
+- `push` в ветку `main`
+- ручной запуск `workflow_dispatch`
+
+Для работы нужно добавить Secrets в GitHub репозитории:
+- `DEPLOY_HOST` — IP или домен сервера (например, `45.128.205.5`)
+- `DEPLOY_USER` — SSH-пользователь (например, `root`)
+- `DEPLOY_SSH_KEY` — приватный SSH-ключ для входа на сервер
+- `DEPLOY_WEB_DIR` — путь для frontend сборки (например, `/var/www/diplomas/gavrilov-retail-store`)
+- `DEPLOY_APP_DIR` — путь к git-репозиторию на сервере (например, `/opt/gavrilov-retail-store`)
+
+Что делает деплой:
+1. Собирает frontend (`npm ci && npm run build`) в `product-web/build/`.
+2. Загружает содержимое `build/` на сервер в `DEPLOY_WEB_DIR`.
+3. На сервере делает `git pull` в `DEPLOY_APP_DIR` и перезапускает API командой `docker compose up -d --build`.
+

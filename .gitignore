@@ -11,6 +11,7 @@ product-api/.idea/
 # Node
 product-web/node_modules/
 product-web/dist/
+product-web/build/
 product-web/playwright-report/
 product-web/test-results/
 
