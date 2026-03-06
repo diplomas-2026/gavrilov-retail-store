@@ -197,6 +197,8 @@ h3 {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .primary-btn,
@@ -234,6 +236,29 @@ h3 {
 .ghost-btn {
   background: #edf2f8;
   color: #27415d;
+}
+
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.qty-btn {
+  min-width: 2.1rem;
+  min-height: 2.1rem;
+  padding: 0.2rem;
+}
+
+.qty-value {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+  color: #1d4066;
+}
+
+.details-qty-control {
+  margin-top: 0.7rem;
 }
 
 .stack-form {

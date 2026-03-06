@@ -19,10 +19,8 @@ export default function CheckoutPage() {
   const { items, clear } = useCart();
 
   const [preview, setPreview] = useState(null);
-  const [deliveryType, setDeliveryType] = useState('COURIER');
   const [pickupPoints, setPickupPoints] = useState([]);
   const [pickupPointId, setPickupPointId] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -49,10 +47,6 @@ export default function CheckoutPage() {
   }, [payloadItems]);
 
   useEffect(() => {
-    if (deliveryType !== 'PICKUP') {
-      return;
-    }
-
     api
       .getPickupPoints()
       .then((data) => {
@@ -62,7 +56,7 @@ export default function CheckoutPage() {
         }
       })
       .catch((err) => setError(err.message || 'Не удалось загрузить пункты выдачи'));
-  }, [deliveryType, pickupPointId]);
+  }, [pickupPointId]);
 
   const submitOrder = async (event) => {
     event.preventDefault();
@@ -72,12 +66,12 @@ export default function CheckoutPage() {
     try {
       await api.createOrder({
         items: payloadItems,
-        deliveryType,
-        pickupPointId: deliveryType === 'PICKUP' ? Number(pickupPointId) : null,
-        deliveryAddress: deliveryType === 'COURIER' ? deliveryAddress : '',
+        deliveryType: 'PICKUP',
+        pickupPointId: Number(pickupPointId),
+        deliveryAddress: '',
         comment
       });
-      clear();
+      await clear();
       setSuccessMessage('Заказ успешно оформлен');
       setTimeout(() => navigate('/profile/orders'), 500);
     } catch (err) {
@@ -97,59 +91,43 @@ export default function CheckoutPage() {
       <form className="stack-form" onSubmit={submitOrder}>
         <label>
           Тип доставки
-          <select value={deliveryType} onChange={(event) => setDeliveryType(event.target.value)}>
-            <option value="COURIER">Курьер</option>
-            <option value="PICKUP">Самовывоз</option>
+          <input value="Самовывоз" disabled />
+        </label>
+
+        <label>
+          Пункт выдачи
+          <select
+            value={pickupPointId}
+            onChange={(event) => setPickupPointId(event.target.value)}
+            data-testid="pickup-point-select"
+          >
+            {pickupPoints.map((point) => (
+              <option key={point.id} value={point.id}>
+                {getPickupProviderLabel(point.provider)} — {point.name}
+              </option>
+            ))}
           </select>
         </label>
 
-        {deliveryType === 'COURIER' ? (
-          <label>
-            Адрес доставки
-            <input
-              value={deliveryAddress}
-              onChange={(event) => setDeliveryAddress(event.target.value)}
-              placeholder="г. Самара, ул. ..., д. ..."
-            />
-          </label>
-        ) : (
-          <>
-            <label>
-              Пункт выдачи
-              <select
-                value={pickupPointId}
-                onChange={(event) => setPickupPointId(event.target.value)}
-                data-testid="pickup-point-select"
-              >
-                {pickupPoints.map((point) => (
-                  <option key={point.id} value={point.id}>
-                    {getPickupProviderLabel(point.provider)} — {point.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {selectedPickupPoint && (
-              <div className="pickup-inline-card" data-testid="pickup-point-card">
-                <div className="pickup-point-head">
-                  {selectedPickupPoint.logoUrl ? (
-                    <img src={selectedPickupPoint.logoUrl} alt={selectedPickupPoint.provider} className="pickup-provider-logo" />
-                  ) : null}
-                  <div>
-                    <strong>{selectedPickupPoint.name}</strong>
-                    <p className="muted">{getPickupProviderLabel(selectedPickupPoint.provider)}</p>
-                  </div>
-                </div>
-                <p>{selectedPickupPoint.address}</p>
-                {selectedPickupPoint.workHours && <p className="muted">График: {selectedPickupPoint.workHours}</p>}
-                <iframe
-                  title="Карта ПВЗ"
-                  className="pickup-map"
-                  src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
-                />
+        {selectedPickupPoint && (
+          <div className="pickup-inline-card" data-testid="pickup-point-card">
+            <div className="pickup-point-head">
+              {selectedPickupPoint.logoUrl ? (
+                <img src={selectedPickupPoint.logoUrl} alt={selectedPickupPoint.provider} className="pickup-provider-logo" />
+              ) : null}
+              <div>
+                <strong>{selectedPickupPoint.name}</strong>
+                <p className="muted">{getPickupProviderLabel(selectedPickupPoint.provider)}</p>
               </div>
-            )}
-          </>
+            </div>
+            <p>{selectedPickupPoint.address}</p>
+            {selectedPickupPoint.workHours && <p className="muted">График: {selectedPickupPoint.workHours}</p>}
+            <iframe
+              title="Карта ПВЗ"
+              className="pickup-map"
+              src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
+            />
+          </div>
         )}
 
         <label>

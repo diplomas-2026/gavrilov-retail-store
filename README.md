@@ -26,8 +26,8 @@
 docker compose up -d --build
 ```
 
-API: `http://localhost:8080`
-Swagger: `http://localhost:8080/swagger-ui`
+API: `http://localhost:8081`
+Swagger: `http://localhost:8081/swagger-ui`
 
 ## Локальный запуск Web
 

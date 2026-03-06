@@ -20,6 +20,7 @@ import com.company.product.api.repository.OrderItemRepository;
 import com.company.product.api.repository.OrderRepository;
 import com.company.product.api.repository.PickupPointRepository;
 import com.company.product.api.repository.ProductRepository;
+import com.company.product.api.repository.CartItemRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +35,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final PickupPointRepository pickupPointRepository;
+    private final CartItemRepository cartItemRepository;
 
     public OrderService(ProductRepository productRepository,
                         OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
-                        PickupPointRepository pickupPointRepository) {
+                        PickupPointRepository pickupPointRepository,
+                        CartItemRepository cartItemRepository) {
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.pickupPointRepository = pickupPointRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     public CartPreviewResponse preview(CartPreviewRequest request) {
@@ -51,21 +55,19 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(UserEntity customer, OrderCreateRequest request) {
-        if (request.deliveryType() == DeliveryType.COURIER && (request.deliveryAddress() == null || request.deliveryAddress().isBlank())) {
-            throw new BadRequestException("Для курьерской доставки укажите адрес");
+        if (request.deliveryType() != DeliveryType.PICKUP) {
+            throw new BadRequestException("Доступен только самовывоз");
         }
-        if (request.deliveryType() == DeliveryType.PICKUP && request.pickupPointId() == null) {
+        if (request.pickupPointId() == null) {
             throw new BadRequestException("Для самовывоза выберите пункт выдачи");
         }
 
         CartPreviewResponse preview = buildPreview(request.items());
         PickupPointEntity pickupPoint = null;
-        if (request.deliveryType() == DeliveryType.PICKUP) {
-            pickupPoint = pickupPointRepository.findById(request.pickupPointId())
-                    .orElseThrow(() -> new NotFoundException("Пункт выдачи не найден"));
-            if (!pickupPoint.isActive()) {
-                throw new BadRequestException("Выбранный пункт выдачи недоступен");
-            }
+        pickupPoint = pickupPointRepository.findById(request.pickupPointId())
+                .orElseThrow(() -> new NotFoundException("Пункт выдачи не найден"));
+        if (!pickupPoint.isActive()) {
+            throw new BadRequestException("Выбранный пункт выдачи недоступен");
         }
 
         OrderEntity order = new OrderEntity();
@@ -73,11 +75,7 @@ public class OrderService {
         order.setStatus(OrderStatus.NEW);
         order.setDeliveryType(request.deliveryType());
         order.setPickupPoint(pickupPoint);
-        if (request.deliveryType() == DeliveryType.PICKUP) {
-            order.setDeliveryAddress(pickupPoint.getAddress());
-        } else {
-            order.setDeliveryAddress(request.deliveryAddress());
-        }
+        order.setDeliveryAddress(pickupPoint.getAddress());
         order.setComment(request.comment());
         order.setTotalAmount(preview.totalAmount());
 
@@ -97,6 +95,7 @@ public class OrderService {
             orderItem.setLineTotal(item.lineTotal());
             orderItemRepository.save(orderItem);
         }
+        cartItemRepository.deleteByCustomer(customer);
 
         return toResponse(savedOrder);
     }
