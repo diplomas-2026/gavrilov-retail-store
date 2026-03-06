@@ -99,3 +99,4 @@ npx playwright test
 2. Загружает содержимое `build/` на сервер в `DEPLOY_WEB_DIR`.
 3. На сервере делает `git pull` в `DEPLOY_APP_DIR` и перезапускает API командой `docker compose up -d --build`.
 
+Проверка CI/CD: тестовый коммит для валидации автодеплоя.
