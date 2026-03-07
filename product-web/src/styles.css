@@ -22,6 +22,7 @@ body {
   margin: 0;
   font-family: 'IBM Plex Sans', sans-serif;
   color: var(--text);
+  scroll-behavior: smooth;
   background:
     radial-gradient(circle at 10% 0%, rgba(11, 127, 109, 0.13), transparent 32%),
     radial-gradient(circle at 90% 15%, rgba(204, 79, 50, 0.12), transparent 25%),
@@ -97,6 +98,202 @@ h3 {
 .page-container {
   width: min(1200px, 92vw);
   margin: 1.5rem auto 2rem;
+}
+
+.landing-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.35fr minmax(260px, 0.65fr);
+  gap: 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 2rem;
+  color: #f4f8ff;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(65, 203, 176, 0.22), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(255, 174, 120, 0.25), transparent 48%),
+    linear-gradient(132deg, #13374e 0%, #163149 42%, #102230 100%);
+  box-shadow: 0 30px 50px rgba(13, 29, 43, 0.3);
+}
+
+.landing-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -80px -90px auto;
+  width: 220px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: linear-gradient(130deg, rgba(137, 255, 233, 0.26), rgba(255, 255, 255, 0));
+  filter: blur(6px);
+}
+
+.landing-hero-content h1 {
+  max-width: 14ch;
+  font-size: clamp(2rem, 4.3vw, 3.4rem);
+  line-height: 1.03;
+}
+
+.landing-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  letter-spacing: 0.11em;
+  color: rgba(235, 244, 255, 0.8);
+}
+
+.landing-lead {
+  max-width: 62ch;
+  margin: 0.75rem 0 0;
+  color: rgba(240, 246, 255, 0.92);
+  font-size: 1.03rem;
+}
+
+.landing-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.landing-actions .ghost-btn {
+  background: rgba(235, 243, 255, 0.15);
+  color: #e6f1ff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.landing-metrics {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.landing-metrics div {
+  min-width: 140px;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(5px);
+}
+
+.landing-metrics strong {
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.2rem;
+}
+
+.landing-metrics span {
+  font-size: 0.84rem;
+  color: rgba(235, 244, 255, 0.82);
+}
+
+.landing-hero-card {
+  align-self: end;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(7, 16, 23, 0.22);
+  padding: 1rem;
+  animation: float-up 0.85s ease;
+}
+
+.landing-hero-card p {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.landing-hero-card ul {
+  margin: 0.7rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.landing-features {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.landing-feature-card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(155deg, #ffffff 0%, #f6f9ff 100%);
+  padding: 1.1rem;
+  box-shadow: var(--shadow);
+}
+
+.landing-feature-card h3 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.landing-feature-card p {
+  margin: 0.45rem 0 0;
+  color: #4e6078;
+}
+
+.landing-process {
+  border-radius: 20px;
+  background: #f0f7f7;
+  border: 1px solid #d4e8e8;
+  padding: 1.1rem;
+}
+
+.landing-process h2 {
+  font-size: 1.35rem;
+}
+
+.landing-steps {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.landing-step {
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #dce9ee;
+  padding: 0.9rem;
+}
+
+.landing-step span {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dff4f1;
+  color: #0d6759;
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.landing-step p {
+  margin: 0.65rem 0 0;
+  color: #35506d;
+}
+
+@keyframes float-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-banner {
@@ -677,6 +874,19 @@ textarea {
   .topbar {
     flex-wrap: wrap;
     padding: 1rem;
+  }
+
+  .landing-hero {
+    grid-template-columns: 1fr;
+    padding: 1.35rem;
+  }
+
+  .landing-hero-content h1 {
+    max-width: 100%;
+  }
+
+  .landing-hero-card {
+    align-self: stretch;
   }
 
   .details-page {
