@@ -9,6 +9,8 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert } from '../components/ui/alert';
 import { Textarea } from '../components/ui/textarea';
+import { Input } from '../components/ui/input';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -27,6 +29,11 @@ export default function CheckoutPage() {
   const [pickupPoints, setPickupPoints] = useState([]);
   const [pickupPointId, setPickupPointId] = useState('');
   const [comment, setComment] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [showCvc, setShowCvc] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -69,6 +76,17 @@ export default function CheckoutPage() {
     setSuccessMessage('');
 
     try {
+      const paymentError = validateCard({
+        cardNumber,
+        cardHolder,
+        cardExpiry,
+        cardCvc
+      });
+      if (paymentError) {
+        setError(paymentError);
+        return;
+      }
+
       await api.createOrder({
         items: payloadItems,
         deliveryType: 'PICKUP',
@@ -77,6 +95,10 @@ export default function CheckoutPage() {
         comment
       });
       await clear();
+      setCardNumber('');
+      setCardHolder('');
+      setCardExpiry('');
+      setCardCvc('');
       setSuccessMessage('Заказ успешно оформлен');
       setTimeout(() => navigate('/profile/orders'), 500);
     } catch (err) {
@@ -179,6 +201,97 @@ export default function CheckoutPage() {
               />
             </div>
 
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-extrabold">Оплата картой</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Демо‑режим: данные карты не отправляются на API и нигде не сохраняются.
+                  </div>
+                </div>
+                <div className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-muted text-muted-foreground">
+                  <Lock className="h-5 w-5" />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2 sm:col-span-2">
+                  <label className="text-sm font-semibold" htmlFor="cardNumber">
+                    Номер карты
+                  </label>
+                  <Input
+                    id="cardNumber"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                    placeholder="0000 0000 0000 0000"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    maxLength={19}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2 sm:col-span-2">
+                  <label className="text-sm font-semibold" htmlFor="cardHolder">
+                    Имя держателя
+                  </label>
+                  <Input
+                    id="cardHolder"
+                    value={cardHolder}
+                    onChange={(e) => setCardHolder(e.target.value)}
+                    placeholder="IVAN IVANOV"
+                    autoComplete="cc-name"
+                    maxLength={80}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <label className="text-sm font-semibold" htmlFor="cardExpiry">
+                    Срок действия
+                  </label>
+                  <Input
+                    id="cardExpiry"
+                    value={cardExpiry}
+                    onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                    placeholder="MM/YY"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
+                    maxLength={5}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <label className="text-sm font-semibold" htmlFor="cardCvc">
+                    CVC/CVV
+                  </label>
+                  <div className="relative">
+                    <Input
+                      id="cardCvc"
+                      value={cardCvc}
+                      onChange={(e) => setCardCvc(formatCvc(e.target.value))}
+                      type={showCvc ? 'text' : 'password'}
+                      placeholder="***"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      maxLength={4}
+                      required
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCvc((v) => !v)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                      aria-label={showCvc ? 'Скрыть CVC' : 'Показать CVC'}
+                    >
+                      {showCvc ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {error ? <Alert variant="danger">{error}</Alert> : null}
             {successMessage ? <Alert variant="success">{successMessage}</Alert> : null}
 
@@ -192,4 +305,39 @@ export default function CheckoutPage() {
       </Card>
     </section>
   );
+}
+
+function formatCardNumber(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 16);
+  return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+}
+
+function formatExpiry(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
+function formatCvc(value) {
+  return String(value || '').replace(/\D/g, '').slice(0, 4);
+}
+
+function validateCard({ cardNumber, cardHolder, cardExpiry, cardCvc }) {
+  const numberDigits = String(cardNumber || '').replace(/\D/g, '');
+  if (numberDigits.length !== 16) return 'Введите корректный номер карты (16 цифр)';
+
+  const name = String(cardHolder || '').trim();
+  if (name.length < 3) return 'Введите имя держателя карты';
+
+  const exp = String(cardExpiry || '').trim();
+  const match = exp.match(/^(\d{2})\/(\d{2})$/);
+  if (!match) return 'Введите срок действия в формате MM/YY';
+
+  const month = Number(match[1]);
+  if (!month || month < 1 || month > 12) return 'Некорректный месяц в сроке действия';
+
+  const cvc = String(cardCvc || '').replace(/\D/g, '');
+  if (cvc.length < 3) return 'Введите CVC/CVV (3–4 цифры)';
+
+  return '';
 }
