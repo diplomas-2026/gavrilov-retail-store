@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleRoute from './components/RoleRoute';
 import AssistantWidget from './components/AssistantWidget';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
