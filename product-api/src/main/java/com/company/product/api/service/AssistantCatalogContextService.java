@@ -7,10 +7,31 @@ import com.company.product.api.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AssistantCatalogContextService {
+
+    private static final Pattern BUDGET_PATTERN = Pattern.compile("(?iu)\\bдо\\s*([0-9][0-9\\s]{1,15})");
+    private static final List<String> TYPE_KEYWORDS = List.of(
+            "диван",
+            "кресло",
+            "стул",
+            "стол",
+            "шкаф",
+            "комод",
+            "кровать",
+            "люстра",
+            "лампа",
+            "светильник",
+            "зеркало",
+            "корзина"
+    );
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
@@ -25,7 +46,7 @@ public class AssistantCatalogContextService {
         this.maxChars = Math.max(5_000, maxChars);
     }
 
-    public String buildCatalogContext() {
+    public String buildCatalogContext(String question) {
         List<CategoryEntity> categories = categoryRepository.findByActiveTrueOrderByIdAsc();
         List<ProductEntity> products = productRepository.findByActiveTrueOrderByIdAsc();
 
@@ -33,6 +54,41 @@ public class AssistantCatalogContextService {
         boolean trimmed = false;
         sb.append("ДАННЫЕ МАГАЗИНА (для ответа пользователю)\n");
         sb.append("Важно: фото отсутствуют и не должны упоминаться.\n\n");
+
+        if (question != null && !question.isBlank()) {
+            BigDecimal budget = parseBudget(question);
+            String type = detectType(question);
+
+            sb.append("Запрос пользователя (для ориентира):\n");
+            if (type != null) {
+                sb.append("- тип: ").append(type).append("\n");
+            }
+            if (budget != null) {
+                sb.append("- бюджет: до ").append(budget).append("\n");
+            }
+            if (type == null && budget == null) {
+                sb.append("- (не удалось выделить ограничения)\n");
+            }
+
+            sb.append("\nПодходящие товары (эвристика, для ускорения выбора):\n");
+            List<ProductEntity> matches = findMatches(products, type, budget);
+            if (matches.isEmpty()) {
+                sb.append("- (не найдено точных совпадений по условиям)\n");
+            } else {
+                for (ProductEntity p : matches) {
+                    sb.append("- productId=").append(p.getId())
+                            .append("; sku=").append(safe(p.getSku()))
+                            .append("; name=").append(safe(p.getName()))
+                            .append("; category=").append(p.getCategory() == null ? "—" : safe(p.getCategory().getName()))
+                            .append("; price=").append(p.getPrice())
+                            .append("; stockQty=").append(p.getStockQty());
+                    sb.append("\n");
+                    trimmed = trimIfNeeded(sb);
+                    if (trimmed) return sb.toString();
+                }
+            }
+            sb.append("\n");
+        }
 
         sb.append("Категории:\n");
         for (CategoryEntity c : categories) {
@@ -68,6 +124,10 @@ public class AssistantCatalogContextService {
         return sb.toString();
     }
 
+    public String buildCatalogContext() {
+        return buildCatalogContext(null);
+    }
+
     private boolean trimIfNeeded(StringBuilder sb) {
         if (sb.length() <= maxChars) {
             return false;
@@ -83,5 +143,72 @@ public class AssistantCatalogContextService {
     private static String safe(String s) {
         if (s == null) return "";
         return s.replace("\r", " ").replace("\n", " ").trim();
+    }
+
+    private static BigDecimal parseBudget(String question) {
+        Matcher m = BUDGET_PATTERN.matcher(question);
+        if (!m.find()) {
+            return null;
+        }
+        String raw = m.group(1).replace(" ", "");
+        try {
+            return new BigDecimal(raw);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static String detectType(String question) {
+        String q = question.toLowerCase(Locale.ROOT);
+        for (String t : TYPE_KEYWORDS) {
+            if (q.contains(t)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    private static List<ProductEntity> findMatches(List<ProductEntity> products, String type, BigDecimal budget) {
+        List<ScoredProduct> scored = new ArrayList<>();
+        for (ProductEntity p : products) {
+            if (!p.isActive()) continue;
+            if (p.getStockQty() != null && p.getStockQty() <= 0) continue;
+
+            String name = safe(p.getName()).toLowerCase(Locale.ROOT);
+            String desc = safe(p.getDescription()).toLowerCase(Locale.ROOT);
+            String cat = p.getCategory() == null ? "" : safe(p.getCategory().getName()).toLowerCase(Locale.ROOT);
+
+            if (budget != null && p.getPrice() != null && p.getPrice().compareTo(budget) > 0) {
+                continue;
+            }
+
+            int score = 0;
+            if (type != null) {
+                boolean typeHit = name.contains(type) || desc.contains(type) || cat.contains(type);
+                if (!typeHit) {
+                    continue;
+                }
+                if (name.contains(type)) score += 5;
+                if (desc.contains(type)) score += 3;
+                if (cat.contains(type)) score += 2;
+            } else {
+                score += 1;
+            }
+
+            scored.add(new ScoredProduct(p, score));
+        }
+
+        scored.sort((a, b) -> {
+            int byScore = Integer.compare(b.score, a.score);
+            if (byScore != 0) return byScore;
+            BigDecimal ap = a.product.getPrice() == null ? BigDecimal.ZERO : a.product.getPrice();
+            BigDecimal bp = b.product.getPrice() == null ? BigDecimal.ZERO : b.product.getPrice();
+            return ap.compareTo(bp);
+        });
+
+        return scored.stream().limit(10).map(sp -> sp.product).toList();
+    }
+
+    private record ScoredProduct(ProductEntity product, int score) {
     }
 }
