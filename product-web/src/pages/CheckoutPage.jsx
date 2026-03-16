@@ -205,9 +205,6 @@ export default function CheckoutPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-sm font-extrabold">Оплата картой</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    Демо‑режим: данные карты не отправляются на API и нигде не сохраняются.
-                  </div>
                 </div>
                 <div className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-muted text-muted-foreground">
                   <Lock className="h-5 w-5" />
