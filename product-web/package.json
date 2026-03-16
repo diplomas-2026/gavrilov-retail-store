@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "gen:placeholders": "node ./scripts/generate-product-placeholders.mjs",
+    "gen:images": "node ./scripts/generate-product-images.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
