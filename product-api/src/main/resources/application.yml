@@ -6,6 +6,13 @@ spring:
     driver-class-name: org.postgresql.Driver
   ai:
     gigachat:
+      chat:
+        options:
+          # Самый простой/дешёвый вариант для демо.
+          # По документации GigaChat, "GigaChat-2" предназначена для более простых задач и дешевле по ресурсам.
+          model: ${GIGACHAT_MODEL:GigaChat-2}
+          temperature: ${GIGACHAT_TEMPERATURE:0.4}
+          max-tokens: ${GIGACHAT_MAX_TOKENS:256}
       auth:
         bearer:
           api-key: ${GIGACHAT_API_KEY:}
