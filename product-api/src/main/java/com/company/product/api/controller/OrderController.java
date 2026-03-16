@@ -10,7 +10,6 @@ import com.company.product.api.service.CurrentUserService;
 import com.company.product.api.service.OrderService;
 import com.company.product.api.service.PickupCodeBarcodeService;
 import jakarta.validation.Valid;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,7 +71,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getByPickupCode(code));
     }
 
-    @GetMapping(value = "/orders/my/{id}/pickup-code/barcode", produces = MediaType.IMAGE_SVG_XML_VALUE)
+    @GetMapping(value = "/orders/my/{id}/pickup-code/barcode", produces = "image/svg+xml")
     public ResponseEntity<String> myOrderPickupBarcode(@PathVariable Long id) {
         UserEntity customer = currentUserService.getCurrentUser();
         String code = orderService.getMyPickupCode(customer, id);
