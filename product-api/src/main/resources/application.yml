@@ -42,3 +42,5 @@ security:
 app:
   seed-dir: ${APP_SEED_DIR:seed-data}
   users-file: ${APP_USERS_FILE:users.txt}
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,https://gavrilov-retail-store.matstart.ru}
