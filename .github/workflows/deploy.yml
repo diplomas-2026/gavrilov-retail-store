@@ -65,5 +65,5 @@ jobs:
           DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
           GIGACHAT_API_KEY: ${{ secrets.GIGACHAT_API_KEY }}
         run: |
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && printf 'GIGACHAT_API_KEY=%s\nGIGACHAT_SCOPE=GIGACHAT_API_PERS\nGIGACHAT_UNSAFE_SSL=true\nGIGACHAT_MODEL=GigaChat-2-Lite\n' \"${GIGACHAT_API_KEY}\" > .env.gigachat"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && printf 'GIGACHAT_API_KEY=%s\nGIGACHAT_SCOPE=GIGACHAT_API_PERS\nGIGACHAT_UNSAFE_SSL=true\nGIGACHAT_MODEL=GigaChat-2\n' \"${GIGACHAT_API_KEY}\" > .env.gigachat"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && git checkout main && git pull --ff-only origin main && docker compose --env-file .env.gigachat up -d --build"

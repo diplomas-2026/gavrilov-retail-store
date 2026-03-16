@@ -19,7 +19,7 @@ spring:
       chat:
         options:
           # Самый простой/дешёвый вариант для демо.
-          model: ${GIGACHAT_MODEL:GigaChat-2-Lite}
+          model: ${GIGACHAT_MODEL:GigaChat-2}
           temperature: ${GIGACHAT_TEMPERATURE:0.4}
           max-tokens: ${GIGACHAT_MAX_TOKENS:256}
       auth:
