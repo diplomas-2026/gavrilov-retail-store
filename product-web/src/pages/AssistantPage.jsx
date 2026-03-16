@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AssistantPage() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -16,12 +19,12 @@ export default function AssistantPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const canSend = useMemo(() => question.trim().length > 0 && !loading, [question, loading]);
+  const canSend = useMemo(() => Boolean(user) && question.trim().length > 0 && !loading, [question, loading, user]);
 
   const send = async (event) => {
     event.preventDefault();
     const q = question.trim();
-    if (!q || loading) {
+    if (!user || !q || loading) {
       return;
     }
 
@@ -48,6 +51,15 @@ export default function AssistantPage() {
           <CardDescription>Демо‑режим: один вопрос → один ответ (без контекста).</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+          {!user ? (
+            <Alert variant="info">
+              Чтобы пользоваться помощником, нужно{' '}
+              <Link to="/login" className="font-semibold underline-offset-4 hover:underline">
+                авторизироваться
+              </Link>
+              .
+            </Alert>
+          ) : null}
           {error ? <Alert variant="danger">{error}</Alert> : null}
 
           <div className="max-h-[56vh] overflow-auto rounded-xl border border-border bg-muted p-4">
@@ -65,6 +77,7 @@ export default function AssistantPage() {
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Например: какой диван лучше для маленькой комнаты?"
               maxLength={500}
+              disabled={!user}
             />
             <Button type="submit" disabled={!canSend} className="sm:w-40">
               Отправить
@@ -95,4 +108,3 @@ function Message({ role, text }) {
     </div>
   );
 }
-

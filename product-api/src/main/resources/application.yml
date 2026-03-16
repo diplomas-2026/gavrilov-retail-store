@@ -9,8 +9,7 @@ spring:
       chat:
         options:
           # Самый простой/дешёвый вариант для демо.
-          # По документации GigaChat, "GigaChat-2" предназначена для более простых задач и дешевле по ресурсам.
-          model: ${GIGACHAT_MODEL:GigaChat-2}
+          model: ${GIGACHAT_MODEL:GigaChat-2-Lite}
           temperature: ${GIGACHAT_TEMPERATURE:0.4}
           max-tokens: ${GIGACHAT_MAX_TOKENS:256}
       auth:

@@ -29,6 +29,10 @@ services:
       DB_PASSWORD: gavrilov
       APP_SEED_DIR: /app/project/seed-data
       APP_USERS_FILE: /app/project/users.txt
+      GIGACHAT_API_KEY: ${GIGACHAT_API_KEY:-}
+      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
+      GIGACHAT_UNSAFE_SSL: ${GIGACHAT_UNSAFE_SSL:-true}
+      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat-2-Lite}
     ports:
       - "8081:8080"
     volumes:

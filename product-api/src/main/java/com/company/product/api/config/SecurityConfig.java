@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/cart/preview", "/api/orders").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my/**").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.POST, "/api/assistant/ask").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/assistant/ask").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/products/**", "/api/categories/**").hasAnyRole("MANAGER", "ADMIN")

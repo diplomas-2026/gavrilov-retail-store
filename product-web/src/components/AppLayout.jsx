@@ -31,7 +31,7 @@ export default function AppLayout() {
     { to: '/pickup-points', label: 'Пункты выдачи', icon: MapPin, show: true },
     { to: '/cart', label: 'Корзина', icon: ShoppingCart, show: isCustomer },
     { to: '/profile/orders', label: 'Мои заказы', icon: ClipboardList, show: isCustomer },
-    { to: '/assistant', label: 'Помощник', icon: Sparkles, show: isCustomer },
+    { to: '/assistant', label: 'Помощник', icon: Sparkles, show: Boolean(user) },
     { to: '/admin', label: 'Управление', icon: Shield, show: canManage }
   ].filter((item) => item.show);
 

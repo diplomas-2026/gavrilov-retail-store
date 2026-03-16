@@ -72,13 +72,7 @@ export default function App() {
         />
         <Route
           path="assistant"
-          element={
-            <ProtectedRoute>
-              <RoleRoute roles={['CUSTOMER']}>
-                <AssistantPage />
-              </RoleRoute>
-            </ProtectedRoute>
-          }
+          element={<AssistantPage />}
         />
 
         <Route
