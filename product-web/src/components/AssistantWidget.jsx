@@ -307,7 +307,7 @@ function Bubble({ role, message, children, isError = false, usage, productsById 
   const recommendedIds = Array.isArray(message?.recommendedProductIds) ? message.recommendedProductIds : [];
   return (
     <div className={isUser ? 'flex justify-end' : 'flex justify-start'}>
-      <div className="max-w-[82%]">
+      <div className={isUser ? 'max-w-[82%]' : 'w-full max-w-[92%] sm:max-w-[82%]'}>
         <div
           className={
             isUser
@@ -337,9 +337,9 @@ function RecommendedProducts({ ids, productsById, onNavigate }) {
   if (uniq.length === 0) return null;
 
   return (
-    <div className="mt-3 grid gap-2">
+    <div className="mt-3 grid w-full gap-2">
       <div className="text-[11px] font-semibold text-muted-foreground">Рекомендую посмотреть:</div>
-      <div className="grid gap-2">
+      <div className="grid w-full gap-2">
         {uniq.slice(0, 6).map((id) => {
           const product = productsById[id];
           if (!product) {
@@ -355,7 +355,7 @@ function RecommendedProducts({ ids, productsById, onNavigate }) {
               key={id}
               to={`/products/${id}`}
               onClick={() => onNavigate?.()}
-              className="block rounded-xl border border-border bg-card/70 px-3 py-2 transition hover:bg-card"
+              className="block w-full rounded-xl border border-border bg-card/70 px-3 py-2 transition hover:bg-card"
             >
               <div className="flex items-start gap-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
