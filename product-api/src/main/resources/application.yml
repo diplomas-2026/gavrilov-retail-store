@@ -5,7 +5,17 @@ spring:
     password: ${DB_PASSWORD:gavrilov}
     driver-class-name: org.postgresql.Driver
   ai:
+    retry:
+      # Чтобы запросы к LLM не "висели" минутами в демо-режиме.
+      max-attempts: ${SPRING_AI_RETRY_MAX_ATTEMPTS:1}
+      backoff:
+        initial-interval: ${SPRING_AI_RETRY_INITIAL_INTERVAL:1s}
+        max-interval: ${SPRING_AI_RETRY_MAX_INTERVAL:1s}
+        multiplier: ${SPRING_AI_RETRY_MULTIPLIER:1}
     gigachat:
+      internal:
+        connect-timeout: ${GIGACHAT_CONNECT_TIMEOUT:3s}
+        read-timeout: ${GIGACHAT_READ_TIMEOUT:10s}
       chat:
         options:
           # Самый простой/дешёвый вариант для демо.

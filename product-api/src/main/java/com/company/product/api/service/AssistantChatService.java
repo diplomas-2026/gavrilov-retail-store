@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +21,7 @@ public class AssistantChatService {
 
     private static final int DEFAULT_LIMIT = 50;
     private static final int MAX_LIMIT = 200;
+    private static final int ANSWER_TIMEOUT_SECONDS = 15;
 
     private final AssistantService assistantService;
     private final AssistantMessageRepository messageRepository;
@@ -61,7 +65,7 @@ public class AssistantChatService {
         boolean error = false;
         String answer;
         try {
-            answer = assistantService.ask(question);
+            answer = askWithTimeout(question);
         } catch (Exception e) {
             error = true;
             answer = formatError(e);
@@ -87,12 +91,36 @@ public class AssistantChatService {
         );
     }
 
+    private String askWithTimeout(String question) {
+        try {
+            return CompletableFuture
+                    .supplyAsync(() -> assistantService.ask(question))
+                    .orTimeout(ANSWER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .join();
+        } catch (CompletionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException re) {
+                throw re;
+            }
+            throw e;
+        }
+    }
+
     private static String formatError(Exception e) {
+        Throwable root = e;
+        while (root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+
         String msg = e.getMessage();
         if (msg == null || msg.isBlank()) {
-            return e.toString();
+            msg = e.toString();
+        }
+
+        String rootMsg = root.getMessage();
+        if (rootMsg != null && !rootMsg.isBlank() && !rootMsg.equals(msg)) {
+            msg = msg + " | Причина: " + root.getClass().getSimpleName() + ": " + rootMsg;
         }
         return e.getClass().getSimpleName() + ": " + msg;
     }
 }
-
