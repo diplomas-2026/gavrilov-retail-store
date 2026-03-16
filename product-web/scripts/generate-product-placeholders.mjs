@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const repoRoot = path.resolve(__dirname, '../..');
 const productsPath = path.resolve(repoRoot, 'product-api/seed-data/products.json');
-const outDir = path.resolve(repoRoot, 'product-web/public/images/products');
+const outDir = path.resolve(repoRoot, 'product-web/public/product-images/products');
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -130,7 +130,7 @@ function main() {
       'utf-8'
     );
 
-    product.images = [`/images/products/${v1}`, `/images/products/${v2}`];
+    product.images = [`/product-images/products/${v1}`, `/product-images/products/${v2}`];
   }
 
   fs.writeFileSync(productsPath, `${JSON.stringify(products, null, 2)}\n`, 'utf-8');
@@ -141,4 +141,3 @@ function main() {
 }
 
 main();
-

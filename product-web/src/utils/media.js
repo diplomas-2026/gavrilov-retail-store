@@ -3,6 +3,10 @@ export function resolveMediaUrl(url) {
     return '';
   }
 
+  if (url.startsWith('/images/products/')) {
+    return url.replace('/images/products/', '/product-images/products/');
+  }
+
   if (url.startsWith('/')) {
     return url;
   }

@@ -9,7 +9,7 @@
     "active": true,
     "categorySlug": "molochnye-produkty",
     "images": [
-      "/images/products/MLK-0001-1.jpg"
+      "/product-images/products/MLK-0001-1.jpg"
     ]
   },
   {
@@ -22,7 +22,7 @@
     "active": true,
     "categorySlug": "molochnye-produkty",
     "images": [
-      "/images/products/MLK-0002-1.jpg"
+      "/product-images/products/MLK-0002-1.jpg"
     ]
   },
   {
@@ -35,7 +35,7 @@
     "active": true,
     "categorySlug": "bakaleya",
     "images": [
-      "/images/products/BKL-0101-1.jpg"
+      "/product-images/products/BKL-0101-1.jpg"
     ]
   },
   {
@@ -48,7 +48,7 @@
     "active": true,
     "categorySlug": "bakaleya",
     "images": [
-      "/images/products/BKL-0102-1.jpg"
+      "/product-images/products/BKL-0102-1.jpg"
     ]
   },
   {
@@ -61,7 +61,7 @@
     "active": true,
     "categorySlug": "ovoshchi-i-frukty",
     "images": [
-      "/images/products/VF-0201-1.jpg"
+      "/product-images/products/VF-0201-1.jpg"
     ]
   },
   {
@@ -74,7 +74,7 @@
     "active": true,
     "categorySlug": "ovoshchi-i-frukty",
     "images": [
-      "/images/products/VF-0202-1.jpg"
+      "/product-images/products/VF-0202-1.jpg"
     ]
   },
   {
@@ -87,7 +87,7 @@
     "active": true,
     "categorySlug": "napitki",
     "images": [
-      "/images/products/DRK-0301-1.jpg"
+      "/product-images/products/DRK-0301-1.jpg"
     ]
   },
   {
@@ -100,7 +100,7 @@
     "active": true,
     "categorySlug": "napitki",
     "images": [
-      "/images/products/DRK-0302-1.jpg"
+      "/product-images/products/DRK-0302-1.jpg"
     ]
   }
 ]

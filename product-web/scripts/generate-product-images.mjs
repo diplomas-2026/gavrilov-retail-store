@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const repoRoot = path.resolve(__dirname, '../..');
 const productsPath = path.resolve(repoRoot, 'product-api/seed-data/products.json');
-const outDir = path.resolve(repoRoot, 'product-web/public/images/products');
+const outDir = path.resolve(repoRoot, 'product-web/public/product-images/products');
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -250,7 +250,7 @@ async function main() {
         }
       }
 
-      images.push(`/images/products/${filename}`);
+      images.push(`/product-images/products/${filename}`);
     }
 
     product.images = images;
