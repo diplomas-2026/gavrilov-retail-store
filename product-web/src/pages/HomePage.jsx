@@ -105,21 +105,6 @@ export default function HomePage() {
               </div>
 
               <div className="grid gap-3">
-                <Card className="bg-muted">
-                  <CardHeader>
-                    <CardTitle>Что внутри платформы</CardTitle>
-                    <CardDescription>Коротко о главных возможностях.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="grid gap-2 text-sm text-muted-foreground">
-                      <li>Умный поиск по каталогу</li>
-                      <li>Актуальные остатки и статусы</li>
-                      <li>Личный кабинет и история заказов</li>
-                      <li>Режим управления для менеджеров</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -138,27 +123,6 @@ export default function HomePage() {
                     </Button>
                   </CardContent>
                 </Card>
-
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Поставщики</CardTitle>
-                      <CardDescription>Только проверенные бренды.</CardDescription>
-                    </CardHeader>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Логистика</CardTitle>
-                      <CardDescription>Самовывоз или курьер.</CardDescription>
-                    </CardHeader>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Поддержка</CardTitle>
-                      <CardDescription>Поможем с оформлением.</CardDescription>
-                    </CardHeader>
-                  </Card>
-                </div>
               </div>
             </div>
           </div>
