@@ -10,7 +10,7 @@ spring:
       max-attempts: ${SPRING_AI_RETRY_MAX_ATTEMPTS:1}
       backoff:
         initial-interval: ${SPRING_AI_RETRY_INITIAL_INTERVAL:1s}
-        max-interval: ${SPRING_AI_RETRY_MAX_INTERVAL:1s}
+        max-interval: ${SPRING_AI_RETRY_MAX_INTERVAL:2s}
         multiplier: ${SPRING_AI_RETRY_MULTIPLIER:2}
     gigachat:
       internal:
