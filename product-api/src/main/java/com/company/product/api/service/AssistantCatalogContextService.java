@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 public class AssistantCatalogContextService {
 
     private static final Pattern BUDGET_PATTERN = Pattern.compile("(?iu)\\bдо\\s*([0-9][0-9\\s]{1,15})");
+    private static final Pattern BUDGET_FALLBACK_NUMBER = Pattern.compile("(?iu)\\bдо\\b[^0-9]{0,20}([0-9][0-9\\s]{1,15})");
+    private static final Pattern BUDGET_K_PATTERN = Pattern.compile("(?iu)\\bдо\\s*([0-9]{1,3})\\s*к\\b");
     private static final List<String> TYPE_KEYWORDS = List.of(
             "диван",
             "кресло",
@@ -162,9 +164,21 @@ public class AssistantCatalogContextService {
     }
 
     private static BigDecimal parseBudget(String question) {
+        Matcher mk = BUDGET_K_PATTERN.matcher(question);
+        if (mk.find()) {
+            try {
+                return new BigDecimal(mk.group(1)).multiply(new BigDecimal("1000"));
+            } catch (Exception ignored) {
+                // continue
+            }
+        }
+
         Matcher m = BUDGET_PATTERN.matcher(question);
         if (!m.find()) {
-            return null;
+            m = BUDGET_FALLBACK_NUMBER.matcher(question);
+            if (!m.find()) {
+                return null;
+            }
         }
         String raw = m.group(1).replace(" ", "");
         try {
