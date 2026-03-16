@@ -3,6 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { formatCurrency, formatDate } from '../utils/format';
 import { getDeliveryTypeLabel, getOrderStatusLabel, getPickupProviderLabel } from '../utils/orderLabels';
+import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert } from '../components/ui/alert';
+import { cn } from '../lib/cn';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -59,106 +63,159 @@ export default function OrderDetailsPage() {
   }, [pickupPoints, selectedPickupId]);
 
   if (error) {
-    return <div className="error-box">{error}</div>;
+    return <Alert variant="danger">{error}</Alert>;
   }
 
   if (!order) {
-    return <div className="status-card">Загрузка заказа...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Загрузка заказа…</CardTitle>
+          <CardDescription>Пожалуйста, подождите.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   return (
-    <section className="panel" data-testid="order-details-page">
-      <div className="order-details-top">
-        <div>
-          <h1>Заказ №{order.id}</h1>
-          <p className="muted">Дата: {formatDate(order.createdAt)}</p>
-        </div>
-        <span className={`status-pill status-${String(order.status).toLowerCase()}`}>{getOrderStatusLabel(order.status)}</span>
-      </div>
+    <section className="grid gap-6" data-testid="order-details-page">
+      <Card>
+        <CardHeader className="flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle>Заказ №{order.id}</CardTitle>
+            <CardDescription>Дата: {formatDate(order.createdAt)}</CardDescription>
+          </div>
+          <Badge variant={statusVariant(order.status)}>{getOrderStatusLabel(order.status)}</Badge>
+        </CardHeader>
+      </Card>
 
-      <div className="order-details-grid">
-        <article className="pickup-inline-card">
-          <h3>Информация о доставке</h3>
-          <p>
-            Тип: <strong>{getDeliveryTypeLabel(order.deliveryType)}</strong>
-          </p>
-          {order.deliveryType === 'PICKUP' ? (
-            <>
-              <p className="muted">
-                ПВЗ: {getPickupProviderLabel(order.pickupPointProvider)} — {order.pickupPointName}
-              </p>
-              <p className="muted">Адрес: {order.deliveryAddress}</p>
-            </>
-          ) : (
-            <p className="muted">Адрес: {order.deliveryAddress || 'Не указан'}</p>
-          )}
-          {order.comment ? <p className="muted">Комментарий: {order.comment}</p> : null}
-        </article>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Доставка</CardTitle>
+            <CardDescription>Данные и комментарий.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2 text-sm">
+            <div>
+              Тип: <span className="font-semibold">{getDeliveryTypeLabel(order.deliveryType)}</span>
+            </div>
+            {order.deliveryType === 'PICKUP' ? (
+              <>
+                <div className="text-muted-foreground">
+                  ПВЗ: {getPickupProviderLabel(order.pickupPointProvider)} — {order.pickupPointName}
+                </div>
+                <div className="text-muted-foreground">Адрес: {order.deliveryAddress}</div>
+              </>
+            ) : (
+              <div className="text-muted-foreground">Адрес: {order.deliveryAddress || 'Не указан'}</div>
+            )}
+            {order.comment ? <div className="text-muted-foreground">Комментарий: {order.comment}</div> : null}
+          </CardContent>
+        </Card>
 
-        <article className="pickup-inline-card">
-          <h3>Состав заказа</h3>
-          <ul className="order-items-detailed order-items-detailed-stack">
-            {order.items.map((item) => (
-              <li key={item.productId}>
-                <span>{item.productName}</span>
-                <span>
-                  {item.qty} × {formatCurrency(item.unitPrice)} = <strong>{formatCurrency(item.lineTotal)}</strong>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="price order-total">Итого: {formatCurrency(order.totalAmount)}</p>
-        </article>
+        <Card>
+          <CardHeader>
+            <CardTitle>Состав заказа</CardTitle>
+            <CardDescription>Товары и итоговая сумма.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <ul className="grid gap-2">
+              {order.items.map((item) => (
+                <li key={item.productId} className="flex items-start justify-between gap-4 rounded-xl border border-border bg-muted p-3 text-sm">
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold">{item.productName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {item.qty} × {formatCurrency(item.unitPrice)}
+                    </div>
+                  </div>
+                  <div className="shrink-0 font-extrabold">{formatCurrency(item.lineTotal)}</div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Итого</div>
+              <div className="text-lg font-extrabold">{formatCurrency(order.totalAmount)}</div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {selectedPickupPoint ? (
-        <article className="pickup-map-section">
-          <div className="pickup-map-section-head">
-            <h3>Карта ПВЗ</h3>
-            <p className="muted">Выберите пункт выдачи на карте</p>
-          </div>
-          <div className="order-items-inline pickup-map-points-inline">
-            {pickupPoints.map((point) => (
-              <button
-                type="button"
-                key={point.id}
-                className={`order-item-chip order-map-chip ${selectedPickupPoint.id === point.id ? 'order-map-chip-active' : ''}`}
-                onClick={() => setSelectedPickupId(point.id)}
-              >
-                {getPickupProviderLabel(point.provider)}: {point.name}
-              </button>
-            ))}
-          </div>
-          <iframe
-            title="Карта ПВЗ заказа"
-            className="pickup-map pickup-map-large"
-            src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
-          />
-          <p className="muted">Адрес: {selectedPickupPoint.address}</p>
-        </article>
+        <Card>
+          <CardHeader>
+            <CardTitle>Карта ПВЗ</CardTitle>
+            <CardDescription>Выберите пункт выдачи для просмотра на карте.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {pickupPoints.map((point) => (
+                <button
+                  key={point.id}
+                  type="button"
+                  onClick={() => setSelectedPickupId(point.id)}
+                  className={cn(
+                    'rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground',
+                    selectedPickupPoint.id === point.id && 'border-ring text-foreground ring-2 ring-ring/20'
+                  )}
+                >
+                  {getPickupProviderLabel(point.provider)}: {point.name}
+                </button>
+              ))}
+            </div>
+            <iframe
+              title="Карта ПВЗ заказа"
+              className="mt-3 h-[360px] w-full rounded-xl border border-border bg-muted"
+              src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
+            />
+            <div className="mt-2 text-sm text-muted-foreground">Адрес: {selectedPickupPoint.address}</div>
+          </CardContent>
+        </Card>
       ) : null}
 
-      <article className="pickup-inline-card other-orders-block" data-testid="customer-orders-list">
-        <h3>Список моих заказов</h3>
-        <div className="customer-orders-list">
-          {orders.map((candidate) => (
-            <Link
-              key={candidate.id}
-              to={`/profile/orders/${candidate.id}`}
-              className={`customer-order-row ${candidate.id === order.id ? 'customer-order-row-active' : ''}`}
-            >
-              <div>
-                <strong>Заказ №{candidate.id}</strong>
-                <p className="muted">{formatDate(candidate.createdAt)}</p>
-              </div>
-              <div className="customer-order-row-right">
-                <span className={`status-pill status-${String(candidate.status).toLowerCase()}`}>{getOrderStatusLabel(candidate.status)}</span>
-                <strong className="price">{formatCurrency(candidate.totalAmount)}</strong>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </article>
+      <Card data-testid="customer-orders-list">
+        <CardHeader>
+          <CardTitle>Список моих заказов</CardTitle>
+          <CardDescription>Быстрый переход между заказами.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2">
+            {orders.map((candidate) => (
+              <Link
+                key={candidate.id}
+                to={`/profile/orders/${candidate.id}`}
+                className={cn(
+                  'flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm transition hover:bg-muted',
+                  candidate.id === order.id && 'border-ring ring-2 ring-ring/20'
+                )}
+              >
+                <div>
+                  <div className="text-sm font-extrabold">Заказ №{candidate.id}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{formatDate(candidate.createdAt)}</div>
+                </div>
+                <div className="grid justify-items-end gap-2">
+                  <Badge variant={statusVariant(candidate.status)}>{getOrderStatusLabel(candidate.status)}</Badge>
+                  <div className="text-sm font-extrabold">{formatCurrency(candidate.totalAmount)}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
+}
+
+function statusVariant(status) {
+  switch (status) {
+    case 'NEW':
+      return 'info';
+    case 'PROCESSING':
+      return 'warning';
+    case 'COMPLETED':
+      return 'success';
+    case 'CANCELLED':
+      return 'danger';
+    default:
+      return 'default';
+  }
 }

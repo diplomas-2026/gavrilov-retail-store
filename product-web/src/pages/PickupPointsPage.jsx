@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { getPickupProviderLabel } from '../utils/orderLabels';
 import { resolveMediaUrl } from '../utils/media';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert } from '../components/ui/alert';
+import { cn } from '../lib/cn';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -32,50 +35,77 @@ export default function PickupPointsPage() {
   const selectedPoint = points.find((point) => point.id === selectedPointId);
 
   return (
-    <section className="panel" data-testid="pickup-points-page">
-      <h1>Пункты выдачи</h1>
-      <p className="muted">Выберите удобный ПВЗ для самовывоза.</p>
-      {error && <div className="error-box">{error}</div>}
+    <section className="grid gap-6" data-testid="pickup-points-page">
+      <Card>
+        <CardHeader>
+          <CardTitle>Пункты выдачи</CardTitle>
+          <CardDescription>Выберите удобный ПВЗ для самовывоза.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error ? <Alert variant="danger">{error}</Alert> : null}
 
-      <div className="pickup-points-grid">
-        {points.map((point) => (
-          <article
-            key={point.id}
-            className={`pickup-point-card ${selectedPointId === point.id ? 'pickup-point-card-active' : ''}`}
-            onClick={() => setSelectedPointId(point.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                setSelectedPointId(point.id);
-              }
-            }}
-          >
-            <div className="pickup-point-head">
-              {point.logoUrl ? <img src={resolveMediaUrl(point.logoUrl)} alt={point.provider} className="pickup-provider-logo" /> : null}
-              <div>
-                <h3>{point.name}</h3>
-                <p className="muted">{getPickupProviderLabel(point.provider)}</p>
-              </div>
+          {points.length === 0 ? (
+            <div className="text-sm text-muted-foreground">Пункты выдачи пока не добавлены.</div>
+          ) : (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {points.map((point) => (
+                <article
+                  key={point.id}
+                  className={cn(
+                    'cursor-pointer rounded-xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-soft',
+                    selectedPointId === point.id && 'border-ring ring-2 ring-ring/20'
+                  )}
+                  onClick={() => setSelectedPointId(point.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      setSelectedPointId(point.id);
+                    }
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    {point.logoUrl ? (
+                      <img
+                        src={resolveMediaUrl(point.logoUrl)}
+                        alt={point.provider}
+                        className="h-11 w-11 rounded-xl border border-border bg-card object-contain p-1"
+                      />
+                    ) : null}
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-extrabold">{point.name}</h3>
+                      <div className="text-xs text-muted-foreground">{getPickupProviderLabel(point.provider)}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-1 text-sm">
+                    <div className="text-muted-foreground">{point.address}</div>
+                    {point.workHours ? <div className="text-xs text-muted-foreground">График: {point.workHours}</div> : null}
+                    {point.phone ? <div className="text-xs text-muted-foreground">Телефон: {point.phone}</div> : null}
+                  </div>
+                </article>
+              ))}
             </div>
-            <p>{point.address}</p>
-            {point.workHours && <p className="muted">График: {point.workHours}</p>}
-            {point.phone && <p className="muted">Телефон: {point.phone}</p>}
-          </article>
-        ))}
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {selectedPoint && (
-        <div className="pickup-map-section" data-testid="pickup-points-map">
-          <h2>ПВЗ на карте</h2>
-          <p className="muted">
-            {getPickupProviderLabel(selectedPoint.provider)} — {selectedPoint.name}
-          </p>
-          <iframe title="Карта пунктов выдачи" className="pickup-map pickup-map-large" src={buildMapUrl(selectedPoint.latitude, selectedPoint.longitude)} />
-        </div>
-      )}
-
-      {points.length === 0 && <div className="status-card">Пункты выдачи пока не добавлены</div>}
+      {selectedPoint ? (
+        <Card data-testid="pickup-points-map">
+          <CardHeader>
+            <CardTitle>ПВЗ на карте</CardTitle>
+            <CardDescription>
+              {getPickupProviderLabel(selectedPoint.provider)} — {selectedPoint.name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <iframe
+              title="Карта пунктов выдачи"
+              className="h-[360px] w-full rounded-xl border border-border bg-muted"
+              src={buildMapUrl(selectedPoint.latitude, selectedPoint.longitude)}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
     </section>
   );
 }

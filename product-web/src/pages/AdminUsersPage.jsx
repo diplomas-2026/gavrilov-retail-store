@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert } from '../components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 
 const roles = ['ADMIN', 'MANAGER', 'CUSTOMER'];
 
@@ -28,37 +31,48 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <section className="panel" data-testid="admin-users-page">
-      <h1>Пользователи и роли</h1>
-      {error && <div className="error-box">{error}</div>}
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Имя</th>
-            <th>Роль</th>
-            <th>Активен</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.email}</td>
-              <td>{user.fullName}</td>
-              <td>
-                <select value={user.role} onChange={(event) => updateRole(user.id, event.target.value)}>
-                  {roles.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>{user.active ? 'Да' : 'Нет'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <section className="grid gap-6" data-testid="admin-users-page">
+      <Card>
+        <CardHeader>
+          <CardTitle>Пользователи</CardTitle>
+          <CardDescription>Управление ролями пользователей.</CardDescription>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {error ? <Alert variant="danger" className="mb-4">{error}</Alert> : null}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Имя</TableHead>
+                <TableHead>Роль</TableHead>
+                <TableHead>Активен</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                  <TableCell className="font-semibold">{user.fullName}</TableCell>
+                  <TableCell>
+                    <select
+                      value={user.role}
+                      onChange={(event) => updateRole(user.id, event.target.value)}
+                      className="h-9 w-full min-w-[180px] rounded-md border border-input bg-card px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {roles.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{user.active ? 'Да' : 'Нет'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </section>
   );
 }
