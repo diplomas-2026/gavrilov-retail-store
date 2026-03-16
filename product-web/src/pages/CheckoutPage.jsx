@@ -5,6 +5,10 @@ import { useCart } from '../contexts/CartContext';
 import { formatCurrency } from '../utils/format';
 import { getPickupProviderLabel } from '../utils/orderLabels';
 import { resolveMediaUrl } from '../utils/media';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert } from '../components/ui/alert';
+import { Textarea } from '../components/ui/textarea';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -81,66 +85,111 @@ export default function CheckoutPage() {
   };
 
   if (items.length === 0) {
-    return <div className="status-card">Для оформления заказа добавьте товары в корзину</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Оформление заказа</CardTitle>
+          <CardDescription>Для оформления заказа добавьте товары в корзину.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   return (
-    <section className="panel" data-testid="checkout-page">
-      <h1>Оформление заказа</h1>
-      {preview && <p className="muted">Итоговая сумма: {formatCurrency(preview.totalAmount)}</p>}
-
-      <form className="stack-form" onSubmit={submitOrder}>
-        <label>
-          Тип доставки
-          <input value="Самовывоз" disabled />
-        </label>
-
-        <label>
-          Пункт выдачи
-          <select
-            value={pickupPointId}
-            onChange={(event) => setPickupPointId(event.target.value)}
-            data-testid="pickup-point-select"
-          >
-            {pickupPoints.map((point) => (
-              <option key={point.id} value={point.id}>
-                {getPickupProviderLabel(point.provider)} — {point.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {selectedPickupPoint && (
-          <div className="pickup-inline-card" data-testid="pickup-point-card">
-            <div className="pickup-point-head">
-              {selectedPickupPoint.logoUrl ? (
-                <img src={resolveMediaUrl(selectedPickupPoint.logoUrl)} alt={selectedPickupPoint.provider} className="pickup-provider-logo" />
-              ) : null}
-              <div>
-                <strong>{selectedPickupPoint.name}</strong>
-                <p className="muted">{getPickupProviderLabel(selectedPickupPoint.provider)}</p>
+    <section className="grid gap-6" data-testid="checkout-page">
+      <Card>
+        <CardHeader>
+          <CardTitle>Оформление заказа</CardTitle>
+          <CardDescription>
+            {preview ? `Итоговая сумма: ${formatCurrency(preview.totalAmount)}` : 'Проверьте параметры самовывоза.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={submitOrder} className="grid gap-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-semibold">Тип доставки</label>
+              <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                Самовывоз
               </div>
             </div>
-            <p>{selectedPickupPoint.address}</p>
-            {selectedPickupPoint.workHours && <p className="muted">График: {selectedPickupPoint.workHours}</p>}
-            <iframe
-              title="Карта ПВЗ"
-              className="pickup-map"
-              src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
-            />
-          </div>
-        )}
 
-        <label>
-          Комментарий к заказу
-          <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={3} />
-        </label>
-        {error && <div className="error-box">{error}</div>}
-        {successMessage && <div className="success-box">{successMessage}</div>}
-        <button className="primary-btn" type="submit" data-testid="submit-order">
-          Подтвердить заказ
-        </button>
-      </form>
+            <div className="grid gap-2">
+              <label className="text-sm font-semibold" htmlFor="pickupPoint">
+                Пункт выдачи
+              </label>
+              <select
+                id="pickupPoint"
+                value={pickupPointId}
+                onChange={(event) => setPickupPointId(event.target.value)}
+                data-testid="pickup-point-select"
+                className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {pickupPoints.map((point) => (
+                  <option key={point.id} value={point.id}>
+                    {getPickupProviderLabel(point.provider)} — {point.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedPickupPoint ? (
+              <div
+                className="rounded-xl border border-border bg-card p-4 shadow-sm"
+                data-testid="pickup-point-card"
+              >
+                <div className="flex items-start gap-3">
+                  {selectedPickupPoint.logoUrl ? (
+                    <img
+                      src={resolveMediaUrl(selectedPickupPoint.logoUrl)}
+                      alt={selectedPickupPoint.provider}
+                      className="h-11 w-11 rounded-xl border border-border bg-card object-contain p-1"
+                    />
+                  ) : null}
+                  <div className="min-w-0">
+                    <div className="text-sm font-extrabold">{selectedPickupPoint.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {getPickupProviderLabel(selectedPickupPoint.provider)}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-1 text-sm">
+                  <div className="text-muted-foreground">{selectedPickupPoint.address}</div>
+                  {selectedPickupPoint.workHours ? (
+                    <div className="text-xs text-muted-foreground">График: {selectedPickupPoint.workHours}</div>
+                  ) : null}
+                </div>
+                <iframe
+                  title="Карта ПВЗ"
+                  className="mt-3 h-60 w-full rounded-xl border border-border bg-muted"
+                  src={buildMapUrl(selectedPickupPoint.latitude, selectedPickupPoint.longitude)}
+                />
+              </div>
+            ) : null}
+
+            <div className="grid gap-2">
+              <label className="text-sm font-semibold" htmlFor="comment">
+                Комментарий к заказу
+              </label>
+              <Textarea
+                id="comment"
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                rows={3}
+                placeholder="Например: позвонить за 15 минут, оставить на ресепшене и т.д."
+              />
+            </div>
+
+            {error ? <Alert variant="danger">{error}</Alert> : null}
+            {successMessage ? <Alert variant="success">{successMessage}</Alert> : null}
+
+            <div className="flex items-center justify-end">
+              <Button type="submit" data-testid="submit-order">
+                Подтвердить заказ
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

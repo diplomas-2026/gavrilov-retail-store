@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/client';
 import ProductCard from '../components/ProductCard';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Alert } from '../components/ui/alert';
+import { Search } from 'lucide-react';
 
 export default function HomePage() {
   const [categories, setCategories] = useState([]);
@@ -41,119 +46,156 @@ export default function HomePage() {
 
   return (
     <section className="catalog-page" data-testid="home-page">
-      <div className="landing-shell">
-        <div className="landing-hero">
-          <div className="landing-hero-content">
-            <p className="landing-kicker">Интернет-магазин ИП Гаврилова</p>
-            <h1>Дом, в который хочется возвращаться</h1>
-            <p className="landing-lead">
-              Подбирайте мебель, освещение и товары для дома в одном месте. Быстрый заказ, прозрачные цены,
-              самовывоз или доставка курьером.
-            </p>
-            <div className="landing-actions">
-              <a href="#catalog-start" className="primary-btn">
-                Перейти к каталогу
-              </a>
-              <a href="/pickup-points" className="ghost-btn">
-                Пункты выдачи
-              </a>
-            </div>
-            <div className="landing-metrics">
+      <div className="grid gap-6">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft2">
+          <div className="relative p-6 sm:p-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(0,0,0,0.06),transparent_40%),radial-gradient(circle_at_90%_20%,rgba(0,0,0,0.05),transparent_35%)]" />
+            <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
-                <strong>5000+</strong>
-                <span>товаров</span>
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Интернет-магазин ИП Гаврилова
+                </div>
+                <h1 className="mt-3 max-w-[18ch] text-4xl font-extrabold tracking-tight sm:text-5xl">
+                  Дом, в который хочется возвращаться
+                </h1>
+                <p className="mt-4 max-w-prose text-sm text-muted-foreground sm:text-base">
+                  Подбирайте мебель, освещение и товары для дома в одном месте. Быстрый заказ, прозрачные цены,
+                  самовывоз или доставка курьером.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <a href="#catalog-start">
+                    <Button>Перейти к каталогу</Button>
+                  </a>
+                  <a href="/pickup-points">
+                    <Button variant="outline">Пункты выдачи</Button>
+                  </a>
+                </div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border bg-muted p-4">
+                    <div className="text-lg font-extrabold">5000+</div>
+                    <div className="text-xs text-muted-foreground">товаров</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-muted p-4">
+                    <div className="text-lg font-extrabold">24 часа</div>
+                    <div className="text-xs text-muted-foreground">сборка заказа</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-muted p-4">
+                    <div className="text-lg font-extrabold">4.9</div>
+                    <div className="text-xs text-muted-foreground">средняя оценка</div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <strong>24 часа</strong>
-                <span>сборка заказа</span>
-              </div>
-              <div>
-                <strong>4.9</strong>
-                <span>средняя оценка</span>
+
+              <div className="grid gap-3">
+                <Card className="bg-muted">
+                  <CardHeader>
+                    <CardTitle>Что внутри платформы</CardTitle>
+                    <CardDescription>Коротко о главных возможностях.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="grid gap-2 text-sm text-muted-foreground">
+                      <li>Умный поиск по каталогу</li>
+                      <li>Актуальные остатки и статусы</li>
+                      <li>Личный кабинет и история заказов</li>
+                      <li>Режим управления для менеджеров</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Поставщики</CardTitle>
+                      <CardDescription>Только проверенные бренды.</CardDescription>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Логистика</CardTitle>
+                      <CardDescription>Самовывоз или курьер.</CardDescription>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Поддержка</CardTitle>
+                      <CardDescription>Поможем с оформлением.</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
-          <div className="landing-hero-card">
-            <p>Что внутри платформы</p>
-            <ul>
-              <li>Умный поиск по каталогу</li>
-              <li>Актуальные остатки и статусы</li>
-              <li>Безопасная авторизация и личный кабинет</li>
-              <li>Контроль заказов на каждом этапе</li>
-            </ul>
-          </div>
         </div>
 
-        <div className="landing-features">
-          <article className="landing-feature-card">
-            <h3>Проверенные поставщики</h3>
-            <p>Работаем с надежными брендами и локальными производителями с гарантией качества.</p>
-          </article>
-          <article className="landing-feature-card">
-            <h3>Быстрая логистика</h3>
-            <p>Выбирайте удобный пункт выдачи или курьерскую доставку по вашему адресу.</p>
-          </article>
-          <article className="landing-feature-card">
-            <h3>Поддержка менеджера</h3>
-            <p>Менеджеры помогают с подбором, наличием и оформлением заказа без лишних шагов.</p>
-          </article>
-        </div>
+        <div id="catalog-start" className="grid gap-6 lg:grid-cols-[320px_1fr]">
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle>Фильтры</CardTitle>
+              <CardDescription>Найдите нужное быстрее.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold" htmlFor="query">
+                  Поиск по названию
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="query"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Например, диван"
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold" htmlFor="category">
+                  Категория
+                </label>
+                <select
+                  id="category"
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                  className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Все категории</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="landing-process">
-          <h2>Как это работает</h2>
-          <div className="landing-steps">
-            <div className="landing-step">
-              <span>01</span>
-              <p>Выберите товары и добавьте их в корзину</p>
-            </div>
-            <div className="landing-step">
-              <span>02</span>
-              <p>Укажите формат получения: самовывоз или доставка</p>
-            </div>
-            <div className="landing-step">
-              <span>03</span>
-              <p>Отслеживайте статус заказа в личном кабинете</p>
-            </div>
+          <div className="grid gap-4">
+            {error ? <Alert variant="danger">{error}</Alert> : null}
+
+            {loading ? (
+              <Card>
+                <CardContent className="p-6 text-sm text-muted-foreground">Загрузка каталога…</CardContent>
+              </Card>
+            ) : (
+              <div
+                className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                data-testid="product-grid"
+              >
+                {products.length > 0 ? (
+                  products.map((product) => <ProductCard key={product.id} product={product} />)
+                ) : (
+                  <Card className="sm:col-span-2 lg:col-span-3">
+                    <CardContent className="p-6 text-sm text-muted-foreground">
+                      По выбранным фильтрам товары не найдены.
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <div id="catalog-start" className="panel filters-panel">
-        <label>
-          Поиск по названию
-          <input
-            type="text"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Например, диван"
-          />
-        </label>
-        <label>
-          Категория
-          <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-            <option value="">Все категории</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      {error && <div className="error-box">{error}</div>}
-
-      {loading ? (
-        <div className="status-card">Загрузка каталога...</div>
-      ) : (
-        <div className="product-grid" data-testid="product-grid">
-          {products.length > 0 ? (
-            products.map((product) => <ProductCard key={product.id} product={product} />)
-          ) : (
-            <div className="status-card">По выбранным фильтрам товары не найдены</div>
-          )}
-        </div>
-      )}
     </section>
   );
 }
