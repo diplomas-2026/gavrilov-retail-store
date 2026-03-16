@@ -14,7 +14,13 @@ export function resolveMediaUrl(url) {
   try {
     const parsed = new URL(url);
     if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
-      return `${window.location.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      const safePath = parsed.pathname.startsWith('/images/products/')
+        ? parsed.pathname.replace('/images/products/', '/product-images/products/')
+        : parsed.pathname;
+      return `${window.location.origin}${safePath}${parsed.search}${parsed.hash}`;
+    }
+    if (window?.location?.origin && url.startsWith(`${window.location.origin}/images/products/`)) {
+      return url.replace(`${window.location.origin}/images/products/`, `${window.location.origin}/product-images/products/`);
     }
     return url;
   } catch {
