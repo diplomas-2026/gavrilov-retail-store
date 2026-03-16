@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { cn } from '../lib/cn';
 import { Package, Tags, ClipboardList, MapPin, Users, ScanLine, Search, CheckCircle2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import QrScanner from 'qr-scanner';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
 import { formatCurrency, formatDate } from '../utils/format';
 import { getDeliveryTypeLabel, getOrderStatusLabel } from '../utils/orderLabels';
 import { Badge } from '../components/ui/badge';
+
+QrScanner.WORKER_PATH = new URL('qr-scanner/qr-scanner-worker.min.js', import.meta.url).toString();
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -212,52 +215,54 @@ function ScannerModal({ onClose, onCode }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    let stream;
-    let rafId;
+    let scanner;
     let stopped = false;
 
-    const start = async () => {
+    (async () => {
       try {
-        if (!('BarcodeDetector' in window)) {
-          setError('Сканирование не поддерживается в этом браузере. Введите код вручную.');
+        if (!videoRef.current) {
+          setError('Не удалось инициализировать сканер. Введите код вручную.');
           return;
         }
-        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
 
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        if (stopped) return;
-        if (!videoRef.current) return;
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        const hasCamera = await QrScanner.hasCamera();
+        if (!hasCamera) {
+          setError('Камера недоступна. Введите код вручную.');
+          return;
+        }
 
-        const tick = async () => {
-          if (stopped) return;
-          try {
-            const barcodes = await detector.detect(videoRef.current);
-            const raw = barcodes?.[0]?.rawValue ? String(barcodes[0].rawValue) : '';
-            const digits = raw.replace(/\D/g, '').slice(0, 6);
+        scanner = new QrScanner(
+          videoRef.current,
+          (result) => {
+            if (stopped) return;
+            const raw = typeof result === 'string' ? result : result?.data;
+            const digits = String(raw || '').replace(/\D/g, '').slice(0, 6);
             if (digits.length === 6) {
               onCode(digits);
-              return;
             }
-          } catch {
-            // ignore
+          },
+          {
+            preferredCamera: 'environment',
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            returnDetailedScanResult: true
           }
-          rafId = requestAnimationFrame(tick);
-        };
-        rafId = requestAnimationFrame(tick);
+        );
+        await scanner.start();
       } catch (e) {
         setError(e?.message || 'Не удалось открыть камеру');
       }
-    };
-
-    start();
+    })();
 
     return () => {
       stopped = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      if (stream) {
-        for (const track of stream.getTracks()) track.stop();
+      if (scanner) {
+        try {
+          scanner.stop();
+        } catch {
+          // ignore
+        }
+        scanner.destroy();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
