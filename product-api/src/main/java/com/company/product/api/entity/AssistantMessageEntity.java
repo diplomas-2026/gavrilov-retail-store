@@ -49,6 +49,9 @@ public class AssistantMessageEntity {
     @Column(length = 120)
     private String model;
 
+    @Column(name = "recommended_product_ids", columnDefinition = "text")
+    private String recommendedProductIds;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -125,6 +128,14 @@ public class AssistantMessageEntity {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public String getRecommendedProductIds() {
+        return recommendedProductIds;
+    }
+
+    public void setRecommendedProductIds(String recommendedProductIds) {
+        this.recommendedProductIds = recommendedProductIds;
     }
 
     public OffsetDateTime getCreatedAt() {

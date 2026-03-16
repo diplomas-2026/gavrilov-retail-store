@@ -36,8 +36,11 @@ public class AssistantController {
     @PostMapping("/ask")
     public ResponseEntity<AskAssistantResponse> ask(@Valid @RequestBody AskAssistantRequest request) {
         // Сохраняем сообщения в БД, но в LLM передаём только вопрос (без контекста).
-        String answer = assistantChatService.sendMessage(currentUserService.getCurrentUser(), request.question()).assistantMessage().message();
-        return ResponseEntity.ok(new AskAssistantResponse(answer));
+        var response = assistantChatService.sendMessage(currentUserService.getCurrentUser(), request.question());
+        return ResponseEntity.ok(new AskAssistantResponse(
+                response.assistantMessage().message(),
+                response.assistantMessage().recommendedProductIds()
+        ));
     }
 
     @GetMapping("/messages")

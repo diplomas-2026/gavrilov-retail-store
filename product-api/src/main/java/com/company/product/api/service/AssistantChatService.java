@@ -6,15 +6,18 @@ import com.company.product.api.entity.AssistantMessageAuthor;
 import com.company.product.api.entity.AssistantMessageEntity;
 import com.company.product.api.entity.UserEntity;
 import com.company.product.api.repository.AssistantMessageRepository;
+import org.springframework.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AssistantChatService {
@@ -69,6 +72,7 @@ public class AssistantChatService {
 
         boolean error = false;
         String answer;
+        List<Long> recommendedProductIds = List.of();
         Integer promptTokens = null;
         Integer completionTokens = null;
         Integer totalTokens = null;
@@ -79,7 +83,8 @@ public class AssistantChatService {
                 answer = buildQuotaExceededMessage(quota);
             } else {
                 AssistantService.AssistantAnswer result = askWithTimeout(question);
-                answer = result.content();
+                answer = result.message();
+                recommendedProductIds = result.productIds() == null ? List.of() : result.productIds();
                 promptTokens = result.promptTokens();
                 completionTokens = result.completionTokens();
                 totalTokens = result.totalTokens();
@@ -94,6 +99,7 @@ public class AssistantChatService {
         assistantMessage.setUser(user);
         assistantMessage.setAuthor(AssistantMessageAuthor.ASSISTANT);
         assistantMessage.setMessage(answer);
+        assistantMessage.setRecommendedProductIds(serializeRecommendedProductIds(recommendedProductIds));
         assistantMessage.setError(error);
         assistantMessage.setPromptTokens(promptTokens);
         assistantMessage.setCompletionTokens(completionTokens);
@@ -116,6 +122,7 @@ public class AssistantChatService {
                 entity.getId(),
                 entity.getAuthor(),
                 entity.getMessage(),
+                parseRecommendedProductIds(entity.getRecommendedProductIds()),
                 entity.isError(),
                 entity.getPromptTokens(),
                 entity.getCompletionTokens(),
@@ -124,6 +131,35 @@ public class AssistantChatService {
                 entity.getCreatedAt()
         );
 }
+
+    private static String serializeRecommendedProductIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return null;
+        String joined = ids.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .limit(12)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        return joined.isBlank() ? null : joined;
+    }
+
+    private static List<Long> parseRecommendedProductIds(String raw) {
+        if (!StringUtils.hasText(raw)) return List.of();
+        String[] parts = raw.split(",");
+        List<Long> ids = new ArrayList<>();
+        for (String p : parts) {
+            String s = p == null ? "" : p.trim();
+            if (s.isEmpty()) continue;
+            if (!s.matches("\\d+")) continue;
+            try {
+                long id = Long.parseLong(s);
+                if (id > 0) ids.add(id);
+            } catch (Exception ignored) {
+                // ignore bad tokens
+            }
+        }
+        return ids.stream().distinct().limit(12).toList();
+    }
 
     private AssistantService.AssistantAnswer askWithTimeout(String question) {
         try {

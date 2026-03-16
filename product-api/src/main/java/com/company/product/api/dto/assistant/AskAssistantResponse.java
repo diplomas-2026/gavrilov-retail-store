@@ -1,5 +1,9 @@
 package com.company.product.api.dto.assistant;
 
-public record AskAssistantResponse(String answer) {
-}
+import java.util.List;
 
+public record AskAssistantResponse(
+        String message,
+        List<Long> recommendedProductIds
+) {
+}

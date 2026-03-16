@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { formatCurrency } from '../utils/format';
 
 const STORAGE_KEY = 'assistantWidgetOpen';
 const OPEN_EVENT = 'assistantWidget:open';
@@ -23,6 +24,7 @@ export default function AssistantWidget() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(readStoredOpen);
   const [messages, setMessages] = useState([]);
+  const [productsById, setProductsById] = useState({});
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,6 +32,7 @@ export default function AssistantWidget() {
 
   const listRef = useRef(null);
   const lastIdRef = useRef(null);
+  const productFetchInFlightRef = useRef(new Set());
 
   const canSend = useMemo(() => {
     const hasText = question.trim().length > 0;
@@ -102,6 +105,8 @@ export default function AssistantWidget() {
     lastIdRef.current = null;
     setError('');
     setQuota(null);
+    setProductsById({});
+    productFetchInFlightRef.current = new Set();
 
     if (!isOpen) return;
     if (!user) return;
@@ -125,6 +130,45 @@ export default function AssistantWidget() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    const ids = new Set();
+    for (const m of messages) {
+      const list = Array.isArray(m.recommendedProductIds) ? m.recommendedProductIds : [];
+      for (const id of list) {
+        if (typeof id === 'number' && Number.isFinite(id)) ids.add(id);
+      }
+    }
+    const missing = [];
+    for (const id of ids) {
+      if (productsById[id]) continue;
+      if (productFetchInFlightRef.current.has(id)) continue;
+      missing.push(id);
+    }
+    if (missing.length === 0) return;
+
+    for (const id of missing) productFetchInFlightRef.current.add(id);
+
+    let alive = true;
+    (async () => {
+      const results = await Promise.allSettled(missing.map((id) => api.getProduct(id)));
+      if (!alive) return;
+      setProductsById((prev) => {
+        const next = { ...prev };
+        results.forEach((r, idx) => {
+          const id = missing[idx];
+          if (r.status === 'fulfilled' && r.value) next[id] = r.value;
+        });
+        return next;
+      });
+      for (const id of missing) productFetchInFlightRef.current.delete(id);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [messages, productsById, user]);
 
   const send = async (event) => {
     event.preventDefault();
@@ -206,9 +250,14 @@ export default function AssistantWidget() {
 
             {user
               ? messages.map((m) => (
-                  <Bubble key={m.id} role={m.author === 'USER' ? 'user' : 'assistant'} isError={Boolean(m.isError)} usage={m}>
-                    {m.message}
-                  </Bubble>
+                  <Bubble
+                    key={m.id}
+                    role={m.author === 'USER' ? 'user' : 'assistant'}
+                    message={m}
+                    isError={Boolean(m.isError)}
+                    usage={m}
+                    productsById={productsById}
+                  />
                 ))
               : null}
 
@@ -249,9 +298,11 @@ function GuestIntro() {
   );
 }
 
-function Bubble({ role, children, isError = false, usage }) {
+function Bubble({ role, message, children, isError = false, usage, productsById = {} }) {
   const isUser = role === 'user';
   const usageText = formatUsage(usage);
+  const text = typeof message?.message === 'string' ? message.message : children;
+  const recommendedIds = Array.isArray(message?.recommendedProductIds) ? message.recommendedProductIds : [];
   return (
     <div className={isUser ? 'flex justify-end' : 'flex justify-start'}>
       <div className="max-w-[82%]">
@@ -264,13 +315,55 @@ function Bubble({ role, children, isError = false, usage }) {
                 }`
           }
         >
-          {children}
+          <div className="whitespace-pre-line">{text}</div>
+          {!isUser && !isError && recommendedIds.length > 0 ? (
+            <RecommendedProducts ids={recommendedIds} productsById={productsById} />
+          ) : null}
         </div>
         {usageText ? (
           <div className={isUser ? 'mt-1 text-right text-[11px] text-muted-foreground' : 'mt-1 text-[11px] text-muted-foreground'}>
             {usageText}
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function RecommendedProducts({ ids, productsById }) {
+  const uniq = Array.from(new Set(ids)).filter((id) => typeof id === 'number' && Number.isFinite(id));
+  if (uniq.length === 0) return null;
+
+  return (
+    <div className="mt-3 grid gap-2">
+      <div className="text-[11px] font-semibold text-muted-foreground">Рекомендую посмотреть:</div>
+      <div className="grid gap-2">
+        {uniq.slice(0, 6).map((id) => {
+          const product = productsById[id];
+          if (!product) {
+            return (
+              <div key={id} className="rounded-xl border border-border bg-card/60 px-3 py-2 text-xs text-muted-foreground">
+                Загружаю товар #{id}…
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={id}
+              to={`/products/${id}`}
+              className="block rounded-xl border border-border bg-card/70 px-3 py-2 transition hover:bg-card"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-extrabold">{product.name}</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">Остаток: {product.stockQty} шт.</div>
+                </div>
+                <div className="shrink-0 text-right text-sm font-extrabold">{formatCurrency(product.price)}</div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
