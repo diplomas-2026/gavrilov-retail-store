@@ -13,6 +13,7 @@ export default function AssistantPage() {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [quota, setQuota] = useState(null);
   const listRef = useRef(null);
   const lastIdRef = useRef(null);
 
@@ -54,10 +55,21 @@ export default function AssistantPage() {
     }
   };
 
+  const refreshQuota = async () => {
+    if (!user) return;
+    try {
+      const res = await api.getAssistantQuota();
+      setQuota(res || null);
+    } catch {
+      // Квота — вспомогательная инфа, не мешаем чату.
+    }
+  };
+
   useEffect(() => {
     setMessages([]);
     lastIdRef.current = null;
     setError('');
+    setQuota(null);
 
     if (!user) {
       return;
@@ -66,12 +78,14 @@ export default function AssistantPage() {
     let alive = true;
     (async () => {
       if (!alive) return;
+      await refreshQuota();
       await refresh({ sinceId: null });
       queueMicrotask(scrollToBottom);
     })();
 
     const timer = setInterval(() => {
       refresh();
+      refreshQuota();
     }, 15000);
 
     return () => {
@@ -98,6 +112,7 @@ export default function AssistantPage() {
       if (res.userMessage) newMessages.push(res.userMessage);
       if (res.assistantMessage) newMessages.push(res.assistantMessage);
       mergeMessages(newMessages);
+      refreshQuota();
     } catch (err) {
       setError(err.message || 'Не удалось получить ответ');
     } finally {
@@ -123,6 +138,8 @@ export default function AssistantPage() {
             </Alert>
           ) : null}
           {error ? <Alert variant="danger">{error}</Alert> : null}
+
+          {user ? <QuotaInfo quota={quota} /> : null}
 
           <div ref={listRef} className="max-h-[56vh] overflow-auto rounded-xl border border-border bg-muted p-4">
             <div className="grid gap-3">
@@ -168,6 +185,39 @@ export default function AssistantPage() {
   );
 }
 
+function QuotaInfo({ quota }) {
+  if (!quota) {
+    return (
+      <div className="text-xs text-muted-foreground" data-testid="assistant-quota">
+        Лимит токенов: загрузка…
+      </div>
+    );
+  }
+
+  const nf = new Intl.NumberFormat('ru-RU');
+  const hasLimit = quota.dailyTokenLimit != null && quota.remainingTokens !== -1;
+  const limitText = hasLimit ? `${nf.format(quota.dailyTokenLimit)} токенов/сутки` : 'без ограничений';
+  const usedText = nf.format(quota.usedTokens ?? 0);
+  const remainingText = hasLimit ? nf.format(Math.max(0, quota.remainingTokens ?? 0)) : '∞';
+  const resetText = quota.periodEnd ? formatDateTimeInZone(new Date(quota.periodEnd), quota.timeZone) : '';
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="assistant-quota">
+      <span>
+        Лимит: <span className="font-medium text-foreground">{limitText}</span>
+      </span>
+      <span>
+        Использовано: <span className="font-medium text-foreground">{usedText}</span>
+      </span>
+      <span>
+        Осталось: <span className="font-medium text-foreground">{remainingText}</span>
+      </span>
+      {resetText ? <span>Сброс: {resetText}</span> : null}
+      {quota.timeZone ? <span>({quota.timeZone})</span> : null}
+    </div>
+  );
+}
+
 function Message({ role, text, isError = false, usage }) {
   const isUser = role === 'user';
   const usageText = formatUsage(usage);
@@ -208,4 +258,19 @@ function formatUsage(usage) {
 
   if (model) parts.push(model);
   return parts.join(' · ');
+}
+
+function formatDateTimeInZone(date, timeZone) {
+  try {
+    return new Intl.DateTimeFormat('ru-RU', {
+      timeZone: timeZone || undefined,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  } catch {
+    return date.toLocaleString('ru-RU');
+  }
 }

@@ -25,11 +25,14 @@ public class AssistantChatService {
 
     private final AssistantService assistantService;
     private final AssistantMessageRepository messageRepository;
+    private final AssistantQuotaService assistantQuotaService;
 
     public AssistantChatService(AssistantService assistantService,
-                                AssistantMessageRepository messageRepository) {
+                                AssistantMessageRepository messageRepository,
+                                AssistantQuotaService assistantQuotaService) {
         this.assistantService = assistantService;
         this.messageRepository = messageRepository;
+        this.assistantQuotaService = assistantQuotaService;
     }
 
     public List<AssistantMessageDto> listMessages(UserEntity user, Long sinceId, Integer limit) {
@@ -55,6 +58,8 @@ public class AssistantChatService {
     }
 
     public SendAssistantMessageResponse sendMessage(UserEntity user, String question) {
+        AssistantQuotaService.AssistantQuotaStatus quota = assistantQuotaService.getStatus();
+
         AssistantMessageEntity userMessage = new AssistantMessageEntity();
         userMessage.setUser(user);
         userMessage.setAuthor(AssistantMessageAuthor.USER);
@@ -69,12 +74,17 @@ public class AssistantChatService {
         Integer totalTokens = null;
         String model = null;
         try {
-            AssistantService.AssistantAnswer result = askWithTimeout(question);
-            answer = result.content();
-            promptTokens = result.promptTokens();
-            completionTokens = result.completionTokens();
-            totalTokens = result.totalTokens();
-            model = result.model();
+            if (assistantQuotaService.isExceeded(quota)) {
+                error = true;
+                answer = buildQuotaExceededMessage(quota);
+            } else {
+                AssistantService.AssistantAnswer result = askWithTimeout(question);
+                answer = result.content();
+                promptTokens = result.promptTokens();
+                completionTokens = result.completionTokens();
+                totalTokens = result.totalTokens();
+                model = result.model();
+            }
         } catch (Exception e) {
             error = true;
             answer = formatError(e);
@@ -94,6 +104,13 @@ public class AssistantChatService {
         return new SendAssistantMessageResponse(toDto(userMessage), toDto(assistantMessage));
     }
 
+    private static String buildQuotaExceededMessage(AssistantQuotaService.AssistantQuotaStatus quota) {
+        String limit = quota.dailyTokenLimit() == null ? "без лимита" : String.valueOf(quota.dailyTokenLimit());
+        return "Лимит токенов AI‑помощника на сутки исчерпан. "
+                + "Лимит: " + limit + ", использовано: " + quota.usedTokens()
+                + ". Сброс лимита: " + quota.periodEnd() + " (" + quota.timeZone() + ").";
+    }
+
     private static AssistantMessageDto toDto(AssistantMessageEntity entity) {
         return new AssistantMessageDto(
                 entity.getId(),
@@ -106,7 +123,7 @@ public class AssistantChatService {
                 entity.getModel(),
                 entity.getCreatedAt()
         );
-    }
+}
 
     private AssistantService.AssistantAnswer askWithTimeout(String question) {
         try {

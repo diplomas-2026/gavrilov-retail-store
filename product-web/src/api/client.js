@@ -72,6 +72,7 @@ export const api = {
   updateUserRole: (id, payload) => request(`/api/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
   askAssistant: (payload) => request('/api/assistant/ask', { method: 'POST', body: JSON.stringify(payload) }),
+  getAssistantQuota: () => request('/api/assistant/quota'),
   listAssistantMessages: (params = {}) => {
     const search = new URLSearchParams();
     if (params.sinceId != null) search.set('sinceId', String(params.sinceId));
