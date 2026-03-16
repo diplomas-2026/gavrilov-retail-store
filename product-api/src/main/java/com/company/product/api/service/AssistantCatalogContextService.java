@@ -46,19 +46,36 @@ public class AssistantCatalogContextService {
         this.maxChars = Math.max(5_000, maxChars);
     }
 
-    public String buildCatalogContext(String question) {
+    public CatalogAnalysis analyze(String question) {
         List<CategoryEntity> categories = categoryRepository.findByActiveTrueOrderByIdAsc();
         List<ProductEntity> products = productRepository.findByActiveTrueOrderByIdAsc();
 
+        String type = question == null ? null : detectType(question);
+        BigDecimal budget = question == null ? null : parseBudget(question);
+
+        List<ProductEntity> matches = question == null ? List.of() : findMatches(products, type, budget);
+        List<ProductEntity> typeMatches = type == null ? List.of() : findMatches(products, type, null);
+
+        String context = buildCatalogContextInternal(question, categories, products, type, budget, matches);
+        return new CatalogAnalysis(context, type, budget, matches, typeMatches);
+    }
+
+    public String buildCatalogContext(String question) {
+        return analyze(question).context();
+    }
+
+    private String buildCatalogContextInternal(String question,
+                                              List<CategoryEntity> categories,
+                                              List<ProductEntity> products,
+                                              String type,
+                                              BigDecimal budget,
+                                              List<ProductEntity> matches) {
         StringBuilder sb = new StringBuilder(32_768);
         boolean trimmed = false;
         sb.append("ДАННЫЕ МАГАЗИНА (для ответа пользователю)\n");
         sb.append("Важно: фото отсутствуют и не должны упоминаться.\n\n");
 
         if (question != null && !question.isBlank()) {
-            BigDecimal budget = parseBudget(question);
-            String type = detectType(question);
-
             sb.append("Запрос пользователя (для ориентира):\n");
             if (type != null) {
                 sb.append("- тип: ").append(type).append("\n");
@@ -71,7 +88,6 @@ public class AssistantCatalogContextService {
             }
 
             sb.append("\nПодходящие товары (эвристика, для ускорения выбора):\n");
-            List<ProductEntity> matches = findMatches(products, type, budget);
             if (matches.isEmpty()) {
                 sb.append("- (не найдено точных совпадений по условиям)\n");
             } else {
@@ -210,5 +226,14 @@ public class AssistantCatalogContextService {
     }
 
     private record ScoredProduct(ProductEntity product, int score) {
+    }
+
+    public record CatalogAnalysis(
+            String context,
+            String type,
+            BigDecimal budget,
+            List<ProductEntity> matches,
+            List<ProductEntity> typeMatches
+    ) {
     }
 }

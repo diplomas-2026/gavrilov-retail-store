@@ -6,6 +6,9 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
+
 @Service
 public class AssistantService {
 
@@ -50,7 +53,13 @@ public class AssistantService {
             throw new IllegalStateException("AI-помощник не настроен (не задан GIGACHAT_API_KEY)");
         }
 
-        String catalogContext = catalogContextService.buildCatalogContext(question);
+        AssistantCatalogContextService.CatalogAnalysis analysis = catalogContextService.analyze(question);
+        String strictLocalAnswer = buildStrictLocalAnswerIfNeeded(analysis);
+        if (strictLocalAnswer != null) {
+            return new AssistantAnswer(strictLocalAnswer, 0, 0, 0, "local");
+        }
+
+        String catalogContext = analysis.context();
         String userPrompt = catalogContext + "\n\nВопрос пользователя:\n" + question;
 
         ChatResponse response = chatClient.prompt()
@@ -71,6 +80,40 @@ public class AssistantService {
         Integer totalTokens = usage == null ? null : usage.getTotalTokens();
 
         return new AssistantAnswer(content, promptTokens, completionTokens, totalTokens, model);
+    }
+
+    private static String buildStrictLocalAnswerIfNeeded(AssistantCatalogContextService.CatalogAnalysis analysis) {
+        String type = analysis.type();
+        BigDecimal budget = analysis.budget();
+
+        if ((type == null && budget == null) || !analysis.matches().isEmpty()) {
+            return null;
+        }
+
+        // Если пользователь задал ограничения, но по ним нет совпадений — отвечаем строго и без LLM,
+        // чтобы не "рекомендовать" не подходящие товары.
+        if (type != null && budget != null) {
+            var cheapestType = analysis.typeMatches().stream()
+                    .min(Comparator.comparing(p -> p.getPrice() == null ? BigDecimal.ZERO : p.getPrice()))
+                    .orElse(null);
+            if (cheapestType == null) {
+                return "В каталоге нет товаров типа «" + type + "». Могу помочь выбрать другой товар из доступного ассортимента — что именно нужно?";
+            }
+            return "В каталоге нет товаров типа «" + type + "» с бюджетом до " + budget + ". "
+                    + "Самый доступный вариант этого типа: " + cheapestType.getName()
+                    + " (productId=" + cheapestType.getId()
+                    + "; sku=" + cheapestType.getSku()
+                    + "; цена " + cheapestType.getPrice()
+                    + "; остаток " + cheapestType.getStockQty() + ").\n\n"
+                    + "Хотите увеличить бюджет или рассмотреть другой тип товара?";
+        }
+
+        if (type != null) {
+            return "По запросу типа «" + type + "» в каталоге нет подходящих товаров. Хотите рассмотреть другой тип товара?";
+        }
+
+        // budget only
+        return "В каталоге нет товаров с бюджетом до " + budget + ". Хотите увеличить бюджет или уточнить категорию/тип товара?";
     }
 
     public record AssistantAnswer(
