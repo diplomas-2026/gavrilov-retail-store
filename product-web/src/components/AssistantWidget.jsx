@@ -319,7 +319,11 @@ function Bubble({ role, message, children, isError = false, usage, productsById 
         >
           <div className="whitespace-pre-line">{text}</div>
           {!isUser && !isError && recommendedIds.length > 0 ? (
-            <RecommendedProducts ids={recommendedIds} productsById={productsById} onNavigate={onNavigate} />
+            <div className="mt-3 -mx-4 border-t border-border/60 pt-3">
+              <div className="px-4">
+                <RecommendedProducts ids={recommendedIds} productsById={productsById} onNavigate={onNavigate} />
+              </div>
+            </div>
           ) : null}
         </div>
         {usageText ? (
@@ -337,14 +341,14 @@ function RecommendedProducts({ ids, productsById, onNavigate }) {
   if (uniq.length === 0) return null;
 
   return (
-    <div className="mt-3 grid w-full gap-2">
+    <div className="grid w-full gap-2">
       <div className="text-[11px] font-semibold text-muted-foreground">Рекомендую посмотреть:</div>
       <div className="grid w-full gap-2">
         {uniq.slice(0, 6).map((id) => {
           const product = productsById[id];
           if (!product) {
             return (
-              <div key={id} className="rounded-xl border border-border bg-card/60 px-3 py-2 text-xs text-muted-foreground">
+              <div key={id} className="w-full rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                 Загружаю товар #{id}…
               </div>
             );
@@ -355,10 +359,10 @@ function RecommendedProducts({ ids, productsById, onNavigate }) {
               key={id}
               to={`/products/${id}`}
               onClick={() => onNavigate?.()}
-              className="block w-full rounded-xl border border-border bg-card/70 px-3 py-2 transition hover:bg-card"
+              className="block w-full rounded-xl bg-muted/40 px-3 py-2 transition hover:bg-muted/55"
             >
-              <div className="flex items-start gap-3">
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+              <div className="grid grid-cols-[48px,1fr] items-center gap-3">
+                <div className="h-12 w-12 overflow-hidden rounded-lg bg-background">
                   <img
                     src={resolveMediaUrl(product.images?.[0])}
                     alt={product.name}
