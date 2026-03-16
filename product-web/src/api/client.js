@@ -71,5 +71,13 @@ export const api = {
   getUsers: () => request('/api/users'),
   updateUserRole: (id, payload) => request(`/api/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
-  askAssistant: (payload) => request('/api/assistant/ask', { method: 'POST', body: JSON.stringify(payload) })
+  askAssistant: (payload) => request('/api/assistant/ask', { method: 'POST', body: JSON.stringify(payload) }),
+  listAssistantMessages: (params = {}) => {
+    const search = new URLSearchParams();
+    if (params.sinceId != null) search.set('sinceId', String(params.sinceId));
+    if (params.limit != null) search.set('limit', String(params.limit));
+    const qs = search.toString();
+    return request(`/api/assistant/messages${qs ? `?${qs}` : ''}`);
+  },
+  sendAssistantMessage: (payload) => request('/api/assistant/messages', { method: 'POST', body: JSON.stringify(payload) })
 };

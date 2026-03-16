@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { Button } from '../components/ui/button';
@@ -9,17 +9,77 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function AssistantPage() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      text: 'Здравствуйте! Задайте вопрос — я отвечу.'
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const listRef = useRef(null);
+  const lastIdRef = useRef(null);
 
   const canSend = useMemo(() => Boolean(user) && question.trim().length > 0 && !loading, [question, loading, user]);
+
+  const scrollToBottom = () => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  };
+
+  const mergeMessages = (incoming) => {
+    if (!Array.isArray(incoming) || incoming.length === 0) return;
+    setMessages((prev) => {
+      const existing = new Set(prev.map((m) => m.id));
+      const next = [...prev];
+      for (const msg of incoming) {
+        if (!existing.has(msg.id)) next.push(msg);
+      }
+      next.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+      return next;
+    });
+    const last = incoming[incoming.length - 1];
+    if (last?.id != null) lastIdRef.current = last.id;
+    queueMicrotask(scrollToBottom);
+  };
+
+  const refresh = async (opts = {}) => {
+    if (!user) return;
+    try {
+      const res = await api.listAssistantMessages({
+        sinceId: opts.sinceId ?? lastIdRef.current,
+        limit: 200
+      });
+      mergeMessages(res.messages || []);
+    } catch (err) {
+      // В чат не пишем, просто показываем сверху.
+      setError(err.message || 'Не удалось загрузить чат');
+    }
+  };
+
+  useEffect(() => {
+    setMessages([]);
+    lastIdRef.current = null;
+    setError('');
+
+    if (!user) {
+      return;
+    }
+
+    let alive = true;
+    (async () => {
+      if (!alive) return;
+      await refresh({ sinceId: null });
+      queueMicrotask(scrollToBottom);
+    })();
+
+    const timer = setInterval(() => {
+      refresh();
+    }, 15000);
+
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const send = async (event) => {
     event.preventDefault();
@@ -31,11 +91,13 @@ export default function AssistantPage() {
     setError('');
     setLoading(true);
     setQuestion('');
-    setMessages((prev) => [...prev, { role: 'user', text: q }]);
 
     try {
-      const res = await api.askAssistant({ question: q });
-      setMessages((prev) => [...prev, { role: 'assistant', text: res.answer || '...' }]);
+      const res = await api.sendAssistantMessage({ question: q });
+      const newMessages = [];
+      if (res.userMessage) newMessages.push(res.userMessage);
+      if (res.assistantMessage) newMessages.push(res.assistantMessage);
+      mergeMessages(newMessages);
     } catch (err) {
       setError(err.message || 'Не удалось получить ответ');
     } finally {
@@ -48,7 +110,7 @@ export default function AssistantPage() {
       <Card>
         <CardHeader>
           <CardTitle>AI‑помощник</CardTitle>
-          <CardDescription>Демо‑режим: один вопрос → один ответ (без контекста).</CardDescription>
+          <CardDescription>Демо‑режим: вопрос → ответ. Сообщения сохраняются в базе (без контекста для LLM).</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           {!user ? (
@@ -62,10 +124,18 @@ export default function AssistantPage() {
           ) : null}
           {error ? <Alert variant="danger">{error}</Alert> : null}
 
-          <div className="max-h-[56vh] overflow-auto rounded-xl border border-border bg-muted p-4">
+          <div ref={listRef} className="max-h-[56vh] overflow-auto rounded-xl border border-border bg-muted p-4">
             <div className="grid gap-3">
-              {messages.map((m, idx) => (
-                <Message key={idx} role={m.role} text={m.text} />
+              {messages.length === 0 ? (
+                <Message role="assistant" text="Здравствуйте! Задайте вопрос — я отвечу." />
+              ) : null}
+              {messages.map((m) => (
+                <Message
+                  key={m.id}
+                  role={m.author === 'USER' ? 'user' : 'assistant'}
+                  text={m.message}
+                  isError={Boolean(m.isError)}
+                />
               ))}
               {loading ? <Message role="assistant" text="Думаю…" /> : null}
             </div>
@@ -92,7 +162,7 @@ export default function AssistantPage() {
   );
 }
 
-function Message({ role, text }) {
+function Message({ role, text, isError = false }) {
   const isUser = role === 'user';
   return (
     <div className={isUser ? 'flex justify-end' : 'flex justify-start'}>
@@ -100,7 +170,9 @@ function Message({ role, text }) {
         className={
           isUser
             ? 'max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground shadow-soft'
-            : 'max-w-[80%] rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm'
+            : `max-w-[80%] rounded-2xl border px-4 py-3 text-sm shadow-sm ${
+                isError ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-card text-foreground'
+              }`
         }
       >
         {text}
