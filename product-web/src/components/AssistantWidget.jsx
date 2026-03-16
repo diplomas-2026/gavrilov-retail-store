@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { formatCurrency } from '../utils/format';
+import { resolveMediaUrl } from '../utils/media';
 
 const STORAGE_KEY = 'assistantWidgetOpen';
 const OPEN_EVENT = 'assistantWidget:open';
@@ -257,6 +258,7 @@ export default function AssistantWidget() {
                     isError={Boolean(m.isError)}
                     usage={m}
                     productsById={productsById}
+                    onNavigate={() => setIsOpen(false)}
                   />
                 ))
               : null}
@@ -298,7 +300,7 @@ function GuestIntro() {
   );
 }
 
-function Bubble({ role, message, children, isError = false, usage, productsById = {} }) {
+function Bubble({ role, message, children, isError = false, usage, productsById = {}, onNavigate }) {
   const isUser = role === 'user';
   const usageText = formatUsage(usage);
   const text = typeof message?.message === 'string' ? message.message : children;
@@ -317,7 +319,7 @@ function Bubble({ role, message, children, isError = false, usage, productsById 
         >
           <div className="whitespace-pre-line">{text}</div>
           {!isUser && !isError && recommendedIds.length > 0 ? (
-            <RecommendedProducts ids={recommendedIds} productsById={productsById} />
+            <RecommendedProducts ids={recommendedIds} productsById={productsById} onNavigate={onNavigate} />
           ) : null}
         </div>
         {usageText ? (
@@ -330,7 +332,7 @@ function Bubble({ role, message, children, isError = false, usage, productsById 
   );
 }
 
-function RecommendedProducts({ ids, productsById }) {
+function RecommendedProducts({ ids, productsById, onNavigate }) {
   const uniq = Array.from(new Set(ids)).filter((id) => typeof id === 'number' && Number.isFinite(id));
   if (uniq.length === 0) return null;
 
@@ -352,14 +354,26 @@ function RecommendedProducts({ ids, productsById }) {
             <Link
               key={id}
               to={`/products/${id}`}
+              onClick={() => onNavigate?.()}
               className="block rounded-xl border border-border bg-card/70 px-3 py-2 transition hover:bg-card"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-extrabold">{product.name}</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">Остаток: {product.stockQty} шт.</div>
+              <div className="flex items-start gap-3">
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  <img
+                    src={resolveMediaUrl(product.images?.[0])}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="shrink-0 text-right text-sm font-extrabold">{formatCurrency(product.price)}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-extrabold">{product.name}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
+                    <span>{formatCurrency(product.price)}</span>
+                    <span aria-hidden="true">•</span>
+                    <span>Остаток: {product.stockQty} шт.</span>
+                  </div>
+                </div>
               </div>
             </Link>
           );
