@@ -4,6 +4,13 @@ spring:
     username: ${DB_USERNAME:gavrilov}
     password: ${DB_PASSWORD:gavrilov}
     driver-class-name: org.postgresql.Driver
+  ai:
+    gigachat:
+      auth:
+        bearer:
+          api-key: ${GIGACHAT_API_KEY:}
+          scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
+          unsafe-ssl: ${GIGACHAT_UNSAFE_SSL:true}
   jpa:
     hibernate:
       ddl-auto: validate

@@ -1,7 +1,7 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingCart, LayoutGrid, MapPin, Shield, User, LogOut, Package, Tags, ClipboardList } from 'lucide-react';
+import { ShoppingCart, LayoutGrid, MapPin, Shield, User, LogOut, Package, Tags, ClipboardList, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { cn } from '../lib/cn';
@@ -31,6 +31,7 @@ export default function AppLayout() {
     { to: '/pickup-points', label: 'Пункты выдачи', icon: MapPin, show: true },
     { to: '/cart', label: 'Корзина', icon: ShoppingCart, show: isCustomer },
     { to: '/profile/orders', label: 'Мои заказы', icon: ClipboardList, show: isCustomer },
+    { to: '/assistant', label: 'Помощник', icon: Sparkles, show: isCustomer },
     { to: '/admin', label: 'Управление', icon: Shield, show: canManage }
   ].filter((item) => item.show);
 

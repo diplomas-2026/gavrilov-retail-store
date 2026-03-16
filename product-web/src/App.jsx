@@ -11,6 +11,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
+import AssistantPage from './pages/AssistantPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminCategoriesPage from './pages/AdminCategoriesPage';
@@ -65,6 +66,16 @@ export default function App() {
             <ProtectedRoute>
               <RoleRoute roles={['CUSTOMER']}>
                 <OrderDetailsPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="assistant"
+          element={
+            <ProtectedRoute>
+              <RoleRoute roles={['CUSTOMER']}>
+                <AssistantPage />
               </RoleRoute>
             </ProtectedRoute>
           }

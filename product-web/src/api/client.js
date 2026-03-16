@@ -69,5 +69,7 @@ export const api = {
   deletePickupPoint: (id) => request(`/api/pickup-points/${id}`, { method: 'DELETE' }),
 
   getUsers: () => request('/api/users'),
-  updateUserRole: (id, payload) => request(`/api/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) })
+  updateUserRole: (id, payload) => request(`/api/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) }),
+
+  askAssistant: (payload) => request('/api/assistant/ask', { method: 'POST', body: JSON.stringify(payload) })
 };
