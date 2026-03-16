@@ -10,6 +10,7 @@
     "gen:placeholders": "node ./scripts/generate-product-placeholders.mjs",
     "gen:images": "node ./scripts/generate-product-images.mjs",
     "gen:images:gigachat": "node ./scripts/generate-product-images.mjs --provider=gigachat",
+    "gen:images:gigachat:one": "node ./scripts/generate-product-images.mjs --provider=gigachat --count=1",
     "gen:images:openai": "node ./scripts/generate-product-images.mjs --provider=openai",
     "test:e2e": "playwright test"
   },
