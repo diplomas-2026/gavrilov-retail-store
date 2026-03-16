@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert } from '../components/ui/alert';
 import { cn } from '../lib/cn';
+import PickupCodePanel from '../components/PickupCodePanel';
 
 function buildMapUrl(lat, lon) {
   const delta = 0.01;
@@ -113,6 +114,10 @@ export default function OrderDetailsPage() {
           </CardContent>
         </Card>
 
+        {order.status === 'READY_FOR_PICKUP' && order.pickupCode ? (
+          <PickupCodePanel orderId={order.id} pickupCode={order.pickupCode} />
+        ) : null}
+
         <Card>
           <CardHeader>
             <CardTitle>Состав заказа</CardTitle>
@@ -211,6 +216,8 @@ function statusVariant(status) {
       return 'info';
     case 'PROCESSING':
       return 'warning';
+    case 'READY_FOR_PICKUP':
+      return 'success';
     case 'COMPLETED':
       return 'success';
     case 'CANCELLED':

@@ -1,6 +1,7 @@
 export const ORDER_STATUS_LABELS = {
   NEW: 'Новый',
   PROCESSING: 'В обработке',
+  READY_FOR_PICKUP: 'Готов к получению',
   COMPLETED: 'Выполнен',
   CANCELLED: 'Отменен'
 };

@@ -19,6 +19,7 @@ public record OrderResponse(
         String pickupPointProvider,
         String deliveryAddress,
         String comment,
+        String pickupCode,
         OffsetDateTime createdAt,
         List<OrderItemResponse> items
 ) {

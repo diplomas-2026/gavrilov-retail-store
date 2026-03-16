@@ -8,7 +8,9 @@ import com.company.product.api.dto.order.OrderStatusUpdateRequest;
 import com.company.product.api.entity.UserEntity;
 import com.company.product.api.service.CurrentUserService;
 import com.company.product.api.service.OrderService;
+import com.company.product.api.service.PickupCodeBarcodeService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +29,14 @@ public class OrderController {
 
     private final OrderService orderService;
     private final CurrentUserService currentUserService;
+    private final PickupCodeBarcodeService pickupCodeBarcodeService;
 
-    public OrderController(OrderService orderService, CurrentUserService currentUserService) {
+    public OrderController(OrderService orderService,
+                           CurrentUserService currentUserService,
+                           PickupCodeBarcodeService pickupCodeBarcodeService) {
         this.orderService = orderService;
         this.currentUserService = currentUserService;
+        this.pickupCodeBarcodeService = pickupCodeBarcodeService;
     }
 
     @PostMapping("/cart/preview")
@@ -59,6 +65,19 @@ public class OrderController {
     @GetMapping("/orders")
     public ResponseEntity<List<OrderResponse>> allOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    @GetMapping("/orders/pickup/{code}")
+    public ResponseEntity<OrderResponse> orderByPickupCode(@PathVariable String code) {
+        return ResponseEntity.ok(orderService.getByPickupCode(code));
+    }
+
+    @GetMapping(value = "/orders/my/{id}/pickup-code/barcode", produces = MediaType.IMAGE_SVG_XML_VALUE)
+    public ResponseEntity<String> myOrderPickupBarcode(@PathVariable Long id) {
+        UserEntity customer = currentUserService.getCurrentUser();
+        String code = orderService.getMyPickupCode(customer, id);
+        String svg = pickupCodeBarcodeService.buildQrSvg(code, 180);
+        return ResponseEntity.ok(svg);
     }
 
     @PatchMapping("/orders/{id}/status")

@@ -25,17 +25,22 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class OrderService {
 
+    private static final int PICKUP_CODE_LENGTH = 6;
+    private static final int PICKUP_CODE_GENERATION_ATTEMPTS = 20;
+
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final PickupPointRepository pickupPointRepository;
     private final CartItemRepository cartItemRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public OrderService(ProductRepository productRepository,
                         OrderRepository orderRepository,
@@ -123,8 +128,58 @@ public class OrderService {
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+
+        if (status == OrderStatus.READY_FOR_PICKUP) {
+            if (order.getDeliveryType() != DeliveryType.PICKUP) {
+                throw new BadRequestException("Статус «Готов к получению» доступен только для самовывоза");
+            }
+            if (order.getPickupCode() == null || order.getPickupCode().isBlank()) {
+                order.setPickupCode(generateUniquePickupCode());
+            }
+        }
+
         order.setStatus(status);
         return toResponse(orderRepository.save(order));
+    }
+
+    public OrderResponse getByPickupCode(String pickupCode) {
+        if (pickupCode == null || pickupCode.isBlank()) {
+            throw new BadRequestException("Код получения обязателен");
+        }
+        String normalized = pickupCode.trim();
+        OrderEntity order = orderRepository.findByPickupCode(normalized)
+                .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+        return toResponse(order);
+    }
+
+    public String getMyPickupCode(UserEntity customer, Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+        if (!order.getCustomer().getId().equals(customer.getId())) {
+            throw new NotFoundException("Заказ не найден");
+        }
+        if (order.getStatus() != OrderStatus.READY_FOR_PICKUP || order.getPickupCode() == null || order.getPickupCode().isBlank()) {
+            throw new BadRequestException("Код получения недоступен для этого заказа");
+        }
+        return order.getPickupCode();
+    }
+
+    private String generateUniquePickupCode() {
+        for (int attempt = 0; attempt < PICKUP_CODE_GENERATION_ATTEMPTS; attempt++) {
+            String code = randomDigits(PICKUP_CODE_LENGTH);
+            if (!orderRepository.existsByPickupCode(code)) {
+                return code;
+            }
+        }
+        throw new IllegalStateException("Не удалось сгенерировать код получения заказа");
+    }
+
+    private String randomDigits(int len) {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(secureRandom.nextInt(10));
+        }
+        return sb.toString();
     }
 
     private CartPreviewResponse buildPreview(List<OrderItemRequest> items) {
@@ -178,6 +233,7 @@ public class OrderService {
                 order.getPickupPoint() != null ? order.getPickupPoint().getProvider().name() : null,
                 order.getDeliveryAddress(),
                 order.getComment(),
+                order.getPickupCode(),
                 order.getCreatedAt(),
                 items
         );

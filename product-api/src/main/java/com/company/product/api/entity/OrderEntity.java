@@ -49,6 +49,9 @@ public class OrderEntity {
     @Column(length = 600)
     private String comment;
 
+    @Column(name = "pickup_code", length = 6, unique = true)
+    private String pickupCode;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -117,6 +120,14 @@ public class OrderEntity {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getPickupCode() {
+        return pickupCode;
+    }
+
+    public void setPickupCode(String pickupCode) {
+        this.pickupCode = pickupCode;
     }
 
     public OffsetDateTime getCreatedAt() {

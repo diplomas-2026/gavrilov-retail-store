@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Alert } from '../components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 
-const statuses = ['NEW', 'PROCESSING', 'COMPLETED', 'CANCELLED'];
+const statuses = ['NEW', 'PROCESSING', 'READY_FOR_PICKUP', 'COMPLETED', 'CANCELLED'];
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
