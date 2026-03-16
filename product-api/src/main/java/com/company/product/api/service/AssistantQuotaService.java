@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 public class AssistantQuotaService {
 
     private static final int DEFAULT_DAILY_TOKEN_LIMIT = 10_000;
+    private static final ZoneId DEFAULT_QUOTA_ZONE_ID = ZoneId.of("Europe/Samara");
 
     private final AssistantMessageRepository assistantMessageRepository;
     private final String dailyTokenLimitRaw;
@@ -72,12 +73,12 @@ public class AssistantQuotaService {
 
     private ZoneId resolveZoneId() {
         if (timeZoneRaw == null || timeZoneRaw.isBlank()) {
-            return ZoneId.systemDefault();
+            return DEFAULT_QUOTA_ZONE_ID;
         }
         try {
             return ZoneId.of(timeZoneRaw.trim());
         } catch (Exception ignored) {
-            return ZoneId.systemDefault();
+            return DEFAULT_QUOTA_ZONE_ID;
         }
     }
 
