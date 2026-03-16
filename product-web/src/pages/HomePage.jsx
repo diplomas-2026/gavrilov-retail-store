@@ -59,7 +59,7 @@ export default function HomePage() {
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft2">
           <div className="relative p-6 sm:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(0,0,0,0.06),transparent_40%),radial-gradient(circle_at_90%_20%,rgba(0,0,0,0.05),transparent_35%)]" />
-            <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="relative grid items-start gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
                 <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Интернет-магазин ИП Гаврилова
@@ -104,8 +104,8 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="grid gap-3">
-                <Card>
+              <div className="grid gap-3 self-start">
+                <Card className="h-fit">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4 text-primary" />
