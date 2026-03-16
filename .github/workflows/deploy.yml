@@ -64,8 +64,9 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
           GIGACHAT_API_KEY: ${{ secrets.GIGACHAT_API_KEY }}
+          GIGACHAT_MODEL: ${{ secrets.GIGACHAT_MODEL || 'GigaChat' }}
           ASSISTANT_DAILY_TOKEN_LIMIT: ${{ secrets.ASSISTANT_DAILY_TOKEN_LIMIT }}
           ASSISTANT_QUOTA_TIME_ZONE: ${{ secrets.ASSISTANT_QUOTA_TIME_ZONE || 'Europe/Samara' }}
         run: |
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && printf 'GIGACHAT_API_KEY=%s\nGIGACHAT_SCOPE=GIGACHAT_API_PERS\nGIGACHAT_UNSAFE_SSL=true\nGIGACHAT_MODEL=GigaChat\nASSISTANT_DAILY_TOKEN_LIMIT=%s\nASSISTANT_QUOTA_TIME_ZONE=%s\n' \"${GIGACHAT_API_KEY}\" \"${ASSISTANT_DAILY_TOKEN_LIMIT}\" \"${ASSISTANT_QUOTA_TIME_ZONE}\" > .env.gigachat"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && printf 'GIGACHAT_API_KEY=%s\nGIGACHAT_SCOPE=GIGACHAT_API_PERS\nGIGACHAT_UNSAFE_SSL=true\nGIGACHAT_MODEL=%s\nASSISTANT_DAILY_TOKEN_LIMIT=%s\nASSISTANT_QUOTA_TIME_ZONE=%s\n' \"${GIGACHAT_API_KEY}\" \"${GIGACHAT_MODEL}\" \"${ASSISTANT_DAILY_TOKEN_LIMIT}\" \"${ASSISTANT_QUOTA_TIME_ZONE}\" > .env.gigachat"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_APP_DIR' && git checkout main && git pull --ff-only origin main && docker compose --env-file .env.gigachat up -d --build"
