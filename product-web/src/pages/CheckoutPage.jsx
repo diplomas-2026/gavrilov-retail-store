@@ -8,7 +8,6 @@ import { resolveMediaUrl } from '../utils/media';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert } from '../components/ui/alert';
-import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
@@ -28,7 +27,6 @@ export default function CheckoutPage() {
   const [preview, setPreview] = useState(null);
   const [pickupPoints, setPickupPoints] = useState([]);
   const [pickupPointId, setPickupPointId] = useState('');
-  const [comment, setComment] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardHolder, setCardHolder] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
@@ -92,7 +90,7 @@ export default function CheckoutPage() {
         deliveryType: 'PICKUP',
         pickupPointId: Number(pickupPointId),
         deliveryAddress: '',
-        comment
+        comment: ''
       });
       await clear();
       setCardNumber('');
@@ -187,19 +185,6 @@ export default function CheckoutPage() {
                 />
               </div>
             ) : null}
-
-            <div className="grid gap-2">
-              <label className="text-sm font-semibold" htmlFor="comment">
-                Комментарий к заказу
-              </label>
-              <Textarea
-                id="comment"
-                value={comment}
-                onChange={(event) => setComment(event.target.value)}
-                rows={3}
-                placeholder="Например: позвонить за 15 минут, оставить на ресепшене и т.д."
-              />
-            </div>
 
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
