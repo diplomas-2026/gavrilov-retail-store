@@ -12,4 +12,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, J
     Optional<ProductEntity> findBySku(String sku);
 
     List<ProductEntity> findByActiveTrueOrderByIdAsc();
+
+    long countByActiveTrue();
 }

@@ -5,11 +5,13 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
-import { Search } from 'lucide-react';
+import { MessageCircle, Search, Sparkles } from 'lucide-react';
 
 export default function HomePage() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [productsCount, setProductsCount] = useState(null);
+  const [pickupPointsCount, setPickupPointsCount] = useState(null);
   const [query, setQuery] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [error, setError] = useState('');
@@ -31,9 +33,16 @@ export default function HomePage() {
   useEffect(() => {
     const loadInitial = async () => {
       try {
-        const [categoriesData, productsData] = await Promise.all([api.getCategories(), api.getProducts(params)]);
+        const [categoriesData, productsData, productsTotal, pickupTotal] = await Promise.all([
+          api.getCategories(),
+          api.getProducts(params),
+          api.getProductsCount({ activeOnly: true }),
+          api.getPickupPointsCount()
+        ]);
         setCategories(categoriesData.filter((category) => category.active));
         setProducts(productsData);
+        setProductsCount(typeof productsTotal === 'number' ? productsTotal : null);
+        setPickupPointsCount(typeof pickupTotal === 'number' ? pickupTotal : null);
       } catch (err) {
         setError(err.message || 'Не удалось загрузить каталог');
       } finally {
@@ -69,15 +78,24 @@ export default function HomePage() {
                   <a href="/pickup-points">
                     <Button variant="outline">Пункты выдачи</Button>
                   </a>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2"
+                    onClick={openAssistantWidget}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    AI‑помощник
+                  </Button>
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-border bg-muted p-4">
-                    <div className="text-lg font-extrabold">5000+</div>
+                    <div className="text-lg font-extrabold">{formatCount(productsCount)}</div>
                     <div className="text-xs text-muted-foreground">товаров</div>
                   </div>
                   <div className="rounded-xl border border-border bg-muted p-4">
-                    <div className="text-lg font-extrabold">24 часа</div>
-                    <div className="text-xs text-muted-foreground">сборка заказа</div>
+                    <div className="text-lg font-extrabold">{formatCount(pickupPointsCount)}</div>
+                    <div className="text-xs text-muted-foreground">пунктов выдачи</div>
                   </div>
                   <div className="rounded-xl border border-border bg-muted p-4">
                     <div className="text-lg font-extrabold">4.9</div>
@@ -99,6 +117,25 @@ export default function HomePage() {
                       <li>Личный кабинет и история заказов</li>
                       <li>Режим управления для менеджеров</li>
                     </ul>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4 text-primary" />
+                      GigaChat‑помощник
+                    </CardTitle>
+                    <CardDescription>Поможет выбрать товары и сравнить варианты прямо в магазине.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-sm text-muted-foreground">
+                      Откройте чат в правом нижнем углу или нажмите кнопку.
+                    </div>
+                    <Button type="button" className="gap-2" onClick={openAssistantWidget}>
+                      <Sparkles className="h-4 w-4" />
+                      Открыть AI‑чат
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -198,4 +235,18 @@ export default function HomePage() {
       </div>
     </section>
   );
+}
+
+function formatCount(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '—';
+  return new Intl.NumberFormat('ru-RU').format(value);
+}
+
+function openAssistantWidget() {
+  try {
+    localStorage.setItem('assistantWidgetOpen', 'true');
+  } catch {
+    // ignore
+  }
+  window.dispatchEvent(new Event('assistantWidget:open'));
 }

@@ -1,17 +1,14 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingCart, LayoutGrid, MapPin, Shield, User, LogOut, Package, Tags, ClipboardList, Sparkles } from 'lucide-react';
+import { ShoppingCart, LayoutGrid, MapPin, Shield, User, LogOut, Package, Tags, ClipboardList } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useCart } from '../contexts/CartContext';
 import { cn } from '../lib/cn';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 
 export default function AppLayout() {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { items } = useCart();
 
   const canManage = user && ['ADMIN', 'MANAGER'].includes(user.role);
   const isAdmin = user?.role === 'ADMIN';
@@ -31,7 +28,6 @@ export default function AppLayout() {
     { to: '/pickup-points', label: 'Пункты выдачи', icon: MapPin, show: true },
     { to: '/cart', label: 'Корзина', icon: ShoppingCart, show: isCustomer },
     { to: '/profile/orders', label: 'Мои заказы', icon: ClipboardList, show: isCustomer },
-    { to: '/assistant', label: 'Помощник', icon: Sparkles, show: Boolean(user) },
     { to: '/admin', label: 'Управление', icon: Shield, show: canManage }
   ].filter((item) => item.show);
 
@@ -76,7 +72,6 @@ export default function AppLayout() {
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{item.label}</span>
-                    {item.to === '/cart' && items.length > 0 ? <Badge className="ml-1">{items.length}</Badge> : null}
                   </NavLink>
                 ))}
               </nav>
@@ -187,7 +182,6 @@ export default function AppLayout() {
                         <item.icon className="h-4 w-4" />
                         {item.label}
                       </span>
-                      {item.to === '/cart' && items.length > 0 ? <Badge>{items.length}</Badge> : null}
                     </NavLink>
                   ))}
                 </nav>

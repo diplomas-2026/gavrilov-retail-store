@@ -14,4 +14,6 @@ public interface PickupPointRepository extends JpaRepository<PickupPointEntity, 
     List<PickupPointEntity> findAllByOrderByProviderAscNameAsc();
 
     Optional<PickupPointEntity> findByProviderAndNameIgnoreCase(PickupProvider provider, String name);
+
+    long countByActiveTrue();
 }

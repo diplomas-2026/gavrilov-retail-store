@@ -64,6 +64,13 @@ public class ProductService {
         return toResponse(product);
     }
 
+    public long count(boolean activeOnly) {
+        if (activeOnly) {
+            return productRepository.countByActiveTrue();
+        }
+        return productRepository.count();
+    }
+
     @Transactional
     public ProductResponse create(ProductRequest request) {
         ProductEntity product = new ProductEntity();

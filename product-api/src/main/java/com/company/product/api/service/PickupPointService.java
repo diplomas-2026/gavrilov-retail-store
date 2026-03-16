@@ -27,6 +27,10 @@ public class PickupPointService {
         return pickupPointRepository.findAllByOrderByProviderAscNameAsc().stream().map(this::toResponse).toList();
     }
 
+    public long countActive() {
+        return pickupPointRepository.countByActiveTrue();
+    }
+
     @Transactional
     public PickupPointResponse create(PickupPointRequest request) {
         PickupPointEntity point = new PickupPointEntity();

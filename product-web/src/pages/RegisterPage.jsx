@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordRepeat, setShowPasswordRepeat] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -96,29 +99,51 @@ export default function RegisterPage() {
                 <label className="text-sm font-semibold" htmlFor="password">
                   Пароль
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="grid gap-2">
                 <label className="text-sm font-semibold" htmlFor="passwordRepeat">
                   Повторите пароль
                 </label>
-                <Input
-                  id="passwordRepeat"
-                  type="password"
-                  value={passwordRepeat}
-                  onChange={(event) => setPasswordRepeat(event.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <Input
+                    id="passwordRepeat"
+                    type={showPasswordRepeat ? 'text' : 'password'}
+                    value={passwordRepeat}
+                    onChange={(event) => setPasswordRepeat(event.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordRepeat((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    aria-label={showPasswordRepeat ? 'Скрыть пароль' : 'Показать пароль'}
+                  >
+                    {showPasswordRepeat ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               {error ? <Alert variant="danger">{error}</Alert> : null}
               <Button type="submit" disabled={loading} data-testid="register-submit" className="w-full">

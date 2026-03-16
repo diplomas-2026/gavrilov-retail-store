@@ -46,6 +46,12 @@ export const api = {
   deleteCategory: (id) => request(`/api/categories/${id}`, { method: 'DELETE' }),
 
   getProducts: (params = '') => request(`/api/products${params}`),
+  getProductsCount: (params = {}) => {
+    const search = new URLSearchParams();
+    if (params.activeOnly != null) search.set('activeOnly', String(params.activeOnly));
+    const qs = search.toString();
+    return request(`/api/products/count${qs ? `?${qs}` : ''}`);
+  },
   getProduct: (id) => request(`/api/products/${id}`),
   createProduct: (payload) => request('/api/products', { method: 'POST', body: JSON.stringify(payload) }),
   updateProduct: (id, payload) => request(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
@@ -63,6 +69,7 @@ export const api = {
   updateOrderStatus: (id, payload) => request(`/api/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
   getPickupPoints: () => request('/api/pickup-points'),
+  getPickupPointsCount: () => request('/api/pickup-points/count'),
   getPickupPointsAdmin: () => request('/api/pickup-points/admin'),
   createPickupPoint: (payload) => request('/api/pickup-points', { method: 'POST', body: JSON.stringify(payload) }),
   updatePickupPoint: (id, payload) => request(`/api/pickup-points/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),

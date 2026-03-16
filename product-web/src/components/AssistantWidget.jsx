@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 const STORAGE_KEY = 'assistantWidgetOpen';
+const OPEN_EVENT = 'assistantWidget:open';
 
 function readStoredOpen() {
   try {
@@ -35,6 +36,12 @@ export default function AssistantWidget() {
     const quotaOk = quota ? quota.remainingTokens !== 0 : true;
     return Boolean(user) && hasText && !loading && quotaOk;
   }, [question, loading, user, quota]);
+
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener(OPEN_EVENT, handler);
+    return () => window.removeEventListener(OPEN_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     try {
@@ -164,7 +171,7 @@ export default function AssistantWidget() {
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft2">
         <div className="relative flex items-center justify-between gap-3 bg-primary px-3 py-3 text-primary-foreground">
           <div className="min-w-0">
-            <div className="truncate text-sm font-extrabold leading-tight">Операторов нет в сети</div>
+            <div className="truncate text-sm font-extrabold leading-tight">GigaChat</div>
             <div className="truncate text-[11px] text-primary-foreground/80">AI‑помощник • ответы мгновенно</div>
           </div>
           <button
@@ -324,4 +331,3 @@ function formatDateTimeInZone(date, timeZone) {
     return date.toLocaleString('ru-RU');
   }
 }
-

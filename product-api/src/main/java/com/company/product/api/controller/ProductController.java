@@ -40,6 +40,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.search(query, categoryId, minPrice, maxPrice, activeOnly));
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> count(@RequestParam(defaultValue = "true") boolean activeOnly) {
+        return ResponseEntity.ok(productService.count(activeOnly));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getById(id));

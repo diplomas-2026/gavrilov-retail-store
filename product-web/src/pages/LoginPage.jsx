@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -48,11 +50,6 @@ export default function LoginPage() {
             <p className="mt-3 max-w-prose text-sm text-muted-foreground">
               Авторизуйтесь, чтобы оформить заказ, отслеживать статусы и управлять каталогом (для менеджеров и администраторов).
             </p>
-            <div className="mt-6 grid gap-2 text-sm text-muted-foreground">
-              <div className="rounded-xl border border-border bg-muted p-4">
-                Советы: используйте тестовые аккаунты из <span className="font-semibold">product-api/users.txt</span>.
-              </div>
-            </div>
           </div>
         </div>
 
@@ -81,14 +78,25 @@ export default function LoginPage() {
                 <label className="text-sm font-semibold" htmlFor="password">
                   Пароль
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  autoComplete="current-password"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               {error ? <Alert variant="danger">{error}</Alert> : null}
               <Button type="submit" disabled={loading} data-testid="login-submit" className="w-full">

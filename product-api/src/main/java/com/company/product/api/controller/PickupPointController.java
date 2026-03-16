@@ -32,6 +32,11 @@ public class PickupPointController {
         return ResponseEntity.ok(pickupPointService.getActive());
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countActive() {
+        return ResponseEntity.ok(pickupPointService.countActive());
+    }
+
     @GetMapping("/admin")
     public ResponseEntity<List<PickupPointResponse>> getAll() {
         return ResponseEntity.ok(pickupPointService.getAll());
