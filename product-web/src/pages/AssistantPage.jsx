@@ -135,6 +135,12 @@ export default function AssistantPage() {
                   role={m.author === 'USER' ? 'user' : 'assistant'}
                   text={m.message}
                   isError={Boolean(m.isError)}
+                  usage={{
+                    promptTokens: m.promptTokens,
+                    completionTokens: m.completionTokens,
+                    totalTokens: m.totalTokens,
+                    model: m.model
+                  }}
                 />
               ))}
               {loading ? <Message role="assistant" text="Думаю…" /> : null}
@@ -162,21 +168,44 @@ export default function AssistantPage() {
   );
 }
 
-function Message({ role, text, isError = false }) {
+function Message({ role, text, isError = false, usage }) {
   const isUser = role === 'user';
+  const usageText = formatUsage(usage);
   return (
     <div className={isUser ? 'flex justify-end' : 'flex justify-start'}>
-      <div
-        className={
-          isUser
-            ? 'max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground shadow-soft'
-            : `max-w-[80%] rounded-2xl border px-4 py-3 text-sm shadow-sm ${
-                isError ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-card text-foreground'
-              }`
-        }
-      >
-        {text}
+      <div className="max-w-[80%]">
+        <div
+          className={
+            isUser
+              ? 'rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground shadow-soft'
+              : `rounded-2xl border px-4 py-3 text-sm shadow-sm ${
+                  isError ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-card text-foreground'
+                }`
+          }
+        >
+          {text}
+        </div>
+        {usageText ? (
+          <div className={isUser ? 'mt-1 text-right text-[11px] text-muted-foreground' : 'mt-1 text-[11px] text-muted-foreground'}>
+            {usageText}
+          </div>
+        ) : null}
       </div>
     </div>
   );
+}
+
+function formatUsage(usage) {
+  if (!usage) return '';
+  const total = usage.totalTokens ?? null;
+  const prompt = usage.promptTokens ?? null;
+  const completion = usage.completionTokens ?? null;
+  const model = usage.model ?? '';
+
+  const parts = [];
+  if (total != null) parts.push(`Токены: ${total}`);
+  else if (prompt != null || completion != null) parts.push(`Токены: ${prompt ?? '?'} + ${completion ?? '?'}`);
+
+  if (model) parts.push(model);
+  return parts.join(' · ');
 }

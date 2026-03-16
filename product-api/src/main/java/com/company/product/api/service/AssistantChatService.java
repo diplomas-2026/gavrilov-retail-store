@@ -64,8 +64,17 @@ public class AssistantChatService {
 
         boolean error = false;
         String answer;
+        Integer promptTokens = null;
+        Integer completionTokens = null;
+        Integer totalTokens = null;
+        String model = null;
         try {
-            answer = askWithTimeout(question);
+            AssistantService.AssistantAnswer result = askWithTimeout(question);
+            answer = result.content();
+            promptTokens = result.promptTokens();
+            completionTokens = result.completionTokens();
+            totalTokens = result.totalTokens();
+            model = result.model();
         } catch (Exception e) {
             error = true;
             answer = formatError(e);
@@ -76,6 +85,10 @@ public class AssistantChatService {
         assistantMessage.setAuthor(AssistantMessageAuthor.ASSISTANT);
         assistantMessage.setMessage(answer);
         assistantMessage.setError(error);
+        assistantMessage.setPromptTokens(promptTokens);
+        assistantMessage.setCompletionTokens(completionTokens);
+        assistantMessage.setTotalTokens(totalTokens);
+        assistantMessage.setModel(model);
         assistantMessage = messageRepository.save(assistantMessage);
 
         return new SendAssistantMessageResponse(toDto(userMessage), toDto(assistantMessage));
@@ -87,14 +100,18 @@ public class AssistantChatService {
                 entity.getAuthor(),
                 entity.getMessage(),
                 entity.isError(),
+                entity.getPromptTokens(),
+                entity.getCompletionTokens(),
+                entity.getTotalTokens(),
+                entity.getModel(),
                 entity.getCreatedAt()
         );
     }
 
-    private String askWithTimeout(String question) {
+    private AssistantService.AssistantAnswer askWithTimeout(String question) {
         try {
             return CompletableFuture
-                    .supplyAsync(() -> assistantService.ask(question))
+                    .supplyAsync(() -> assistantService.askWithUsage(question))
                     .orTimeout(ANSWER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                     .join();
         } catch (CompletionException e) {

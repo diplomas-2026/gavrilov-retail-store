@@ -9,7 +9,10 @@ public record AssistantMessageDto(
         AssistantMessageAuthor author,
         String message,
         boolean isError,
+        Integer promptTokens,
+        Integer completionTokens,
+        Integer totalTokens,
+        String model,
         OffsetDateTime createdAt
 ) {
 }
-
