@@ -5,15 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { cn } from '../lib/cn';
 import { Package, Tags, ClipboardList, MapPin, Users, ScanLine, Search, CheckCircle2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import QrScanner from 'qr-scanner';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Alert } from '../components/ui/alert';
 import { formatCurrency, formatDate } from '../utils/format';
 import { getDeliveryTypeLabel, getOrderStatusLabel } from '../utils/orderLabels';
 import { Badge } from '../components/ui/badge';
-
-QrScanner.WORKER_PATH = new URL('qr-scanner/qr-scanner-worker.min.js', import.meta.url).toString();
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -220,6 +217,15 @@ function ScannerModal({ onClose, onCode }) {
 
     (async () => {
       try {
+        const mod = await import('qr-scanner');
+        const QrScanner = mod?.default;
+        if (!QrScanner) {
+          setError('Сканер недоступен. Введите код вручную.');
+          return;
+        }
+
+        QrScanner.WORKER_PATH = new URL('qr-scanner/qr-scanner-worker.min.js', import.meta.url).toString();
+
         if (!videoRef.current) {
           setError('Не удалось инициализировать сканер. Введите код вручную.');
           return;
