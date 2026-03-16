@@ -359,7 +359,7 @@ function RecommendedProducts({ ids, productsById, onNavigate }) {
               key={id}
               to={`/products/${id}`}
               onClick={() => onNavigate?.()}
-              className="block w-full rounded-xl bg-muted/40 px-3 py-2 transition hover:bg-muted/55"
+              className="block w-full rounded-xl border border-border bg-muted/40 px-3 py-2 transition hover:bg-muted/55"
             >
               <div className="grid grid-cols-[48px,1fr] items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-lg bg-background">
