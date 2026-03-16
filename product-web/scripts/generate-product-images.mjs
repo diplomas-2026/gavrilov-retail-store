@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +18,7 @@ function requireEnv(name) {
 
 function parseArgs(argv) {
   const args = {
+    provider: 'gigachat',
     count: 2,
     limit: Infinity,
     model: process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1',
@@ -26,6 +28,7 @@ function parseArgs(argv) {
 
   for (const raw of argv) {
     if (raw === '--dry-run') args.dryRun = true;
+    if (raw.startsWith('--provider=')) args.provider = raw.split('=')[1];
     if (raw.startsWith('--count=')) args.count = Number(raw.split('=')[1]);
     if (raw.startsWith('--limit=')) args.limit = Number(raw.split('=')[1]);
     if (raw.startsWith('--model=')) args.model = raw.split('=')[1];
@@ -35,7 +38,7 @@ function parseArgs(argv) {
   return args;
 }
 
-async function generateImage({ apiKey, model, prompt, size }) {
+async function generateImageOpenAi({ apiKey, model, prompt, size }) {
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: {
@@ -46,8 +49,6 @@ async function generateImage({ apiKey, model, prompt, size }) {
       model,
       prompt,
       size,
-      // Many accounts return base64 in `b64_json`; if your org is configured for URLs,
-      // set OPENAI_IMAGE_RESPONSE_FORMAT=url and pass it below.
       response_format: process.env.OPENAI_IMAGE_RESPONSE_FORMAT || 'b64_json'
     })
   });
@@ -70,9 +71,9 @@ async function generateImage({ apiKey, model, prompt, size }) {
 
 function buildPrompt(product, variantIndex) {
   const base = [
-    'Сгенерируй реалистичное каталожное фото товара для интернет-магазина.',
-    'Стиль: современная предметная съемка, мягкий студийный свет, белый/светло-серый фон, высокое качество, без текста и водяных знаков.',
-    'Кадр: товар по центру, аккуратные тени, без лишних предметов.',
+    'Каталожное фото товара для интернет-магазина.',
+    'Стиль: студийная предметная съемка, белый/светло-серый фон, мягкий свет, реалистично, без текста и водяных знаков.',
+    'Товар по центру, аккуратные тени, без лишних предметов.',
     `Товар: ${product.name}.`,
     product.description ? `Описание: ${product.description}.` : null,
     variantIndex === 2 ? 'Вариант: другой ракурс/угол съемки, сохраняя стиль.' : 'Вариант: основной ракурс.'
@@ -87,15 +88,140 @@ async function downloadToBuffer(url) {
   return Buffer.from(ab);
 }
 
+function uuid4() {
+  return crypto.randomUUID();
+}
+
+async function gigachatGetToken({ authKey, scope }) {
+  const res = await fetch('https://ngw.devices.sberbank.ru:9443/api/v2/oauth', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+      RqUID: uuid4(),
+      Authorization: `Basic ${authKey}`
+    },
+    body: new URLSearchParams({ scope }).toString()
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`GigaChat: ошибка получения токена (${res.status}): ${text}`);
+  }
+  const json = await res.json();
+  if (!json?.access_token) throw new Error('GigaChat: неожиданный ответ токена (нет access_token)');
+  return json.access_token;
+}
+
+async function gigachatGetModels({ token }) {
+  const res = await fetch('https://gigachat.devices.sberbank.ru/api/v1/models', {
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`GigaChat: ошибка получения моделей (${res.status}): ${text}`);
+  }
+  const json = await res.json();
+  const data = Array.isArray(json?.data) ? json.data : [];
+  return data.map((m) => m?.id).filter(Boolean);
+}
+
+function pickGigachatModelId({ available, preferred }) {
+  const set = new Set(available);
+  const candidates = [
+    preferred,
+    'GigaChat-2-Lite',
+    'GigaChat-2-Lite-preview',
+    'GigaChat-2',
+    'GigaChat'
+  ].filter(Boolean);
+
+  for (const c of candidates) {
+    if (set.has(c)) return c;
+  }
+  return preferred || available[0] || 'GigaChat';
+}
+
+function extractFileIdFromHtml(html) {
+  const s = String(html || '');
+  const m1 = s.match(/<img[^>]*\ssrc="([^"]+)"[^>]*>/i);
+  if (m1?.[1]) return m1[1];
+  const m2 = s.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i);
+  if (m2?.[0]) return m2[0];
+  return null;
+}
+
+async function generateImageGigachat({ token, model, prompt }) {
+  const res = await fetch('https://gigachat.devices.sberbank.ru/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: 'system',
+          content: 'Ты создаёшь простые каталожные фотографии товаров для интернет-магазина.'
+        },
+        { role: 'user', content: prompt }
+      ],
+      function_call: 'auto'
+    })
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`GigaChat: ошибка генерации изображения (${res.status}): ${text}`);
+  }
+
+  const json = await res.json();
+  const content = json?.choices?.[0]?.message?.content || '';
+  const fileId = extractFileIdFromHtml(content);
+  if (!fileId) throw new Error('GigaChat: не удалось извлечь file_id из ответа модели');
+  return fileId;
+}
+
+async function gigachatDownloadImage({ token, fileId }) {
+  const url = `https://gigachat.devices.sberbank.ru/api/v1/files/${encodeURIComponent(fileId)}/content`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: 'application/jpg',
+      Authorization: `Bearer ${token}`
+    }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`GigaChat: ошибка скачивания изображения (${res.status}): ${text}`);
+  }
+  const ab = await res.arrayBuffer();
+  return Buffer.from(ab);
+}
+
 async function main() {
-  const { count, limit, model, size, dryRun } = parseArgs(process.argv.slice(2));
-  const apiKey = requireEnv('OPENAI_API_KEY');
+  const { provider, count, limit, model, size, dryRun } = parseArgs(process.argv.slice(2));
 
   if (!fs.existsSync(productsPath)) throw new Error(`Не найден файл: ${productsPath}`);
   fs.mkdirSync(outDir, { recursive: true });
 
   const products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'));
   if (!Array.isArray(products)) throw new Error('products.json должен быть массивом');
+
+  if (process.env.GIGACHAT_INSECURE_TLS === '1') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  }
+
+  let gigachat = null;
+  if (provider === 'gigachat') {
+    const authKey = requireEnv('GIGACHAT_AUTH_KEY');
+    const scope = process.env.GIGACHAT_SCOPE || 'GIGACHAT_API_PERS';
+    const token = await gigachatGetToken({ authKey, scope });
+    const availableModels = await gigachatGetModels({ token }).catch(() => []);
+    const preferred = process.env.GIGACHAT_MODEL || 'GigaChat-2-Lite';
+    const modelId = pickGigachatModelId({ available: availableModels, preferred });
+    gigachat = { token, modelId };
+  }
 
   let processed = 0;
   for (const product of products) {
@@ -105,19 +231,23 @@ async function main() {
 
     const images = [];
     for (let i = 1; i <= count; i++) {
-      const filename = `${sku}-${i}.png`;
+      const filename = provider === 'gigachat' ? `${sku}-${i}.jpg` : `${sku}-${i}.png`;
       const targetPath = path.resolve(outDir, filename);
       const prompt = buildPrompt(product, i);
 
       if (!dryRun) {
-        const out = await generateImage({ apiKey, model, prompt, size });
-        let buffer;
-        if (out.kind === 'b64') {
-          buffer = Buffer.from(out.value, 'base64');
+        if (provider === 'gigachat') {
+          const fileId = await generateImageGigachat({ token: gigachat.token, model: gigachat.modelId, prompt });
+          const buffer = await gigachatDownloadImage({ token: gigachat.token, fileId });
+          fs.writeFileSync(targetPath, buffer);
+        } else if (provider === 'openai') {
+          const apiKey = requireEnv('OPENAI_API_KEY');
+          const out = await generateImageOpenAi({ apiKey, model, prompt, size });
+          const buffer = out.kind === 'b64' ? Buffer.from(out.value, 'base64') : await downloadToBuffer(out.value);
+          fs.writeFileSync(targetPath, buffer);
         } else {
-          buffer = await downloadToBuffer(out.value);
+          throw new Error(`Неизвестный provider: ${provider}. Используйте --provider=gigachat или --provider=openai`);
         }
-        fs.writeFileSync(targetPath, buffer);
       }
 
       images.push(`/images/products/${filename}`);
@@ -142,4 +272,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-

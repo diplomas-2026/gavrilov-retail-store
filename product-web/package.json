@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "gen:placeholders": "node ./scripts/generate-product-placeholders.mjs",
     "gen:images": "node ./scripts/generate-product-images.mjs",
+    "gen:images:gigachat": "node ./scripts/generate-product-images.mjs --provider=gigachat",
+    "gen:images:openai": "node ./scripts/generate-product-images.mjs --provider=openai",
     "test:e2e": "playwright test"
   },
   "dependencies": {
