@@ -57,12 +57,12 @@ export default function ProductDetailsPage() {
           <div className="mt-4 text-2xl font-extrabold tracking-tight">{formatCurrency(product.price)}</div>
           {product.oldPrice ? <div className="text-sm text-muted-foreground line-through">{formatCurrency(product.oldPrice)}</div> : null}
           <div className="mt-4">
-            {user?.role === 'CUSTOMER' && qtyInCart === 0 ? (
+            {user && qtyInCart === 0 ? (
               <Button onClick={() => addToCart(product)} data-testid="details-add-to-cart" className="w-full">
                 Добавить в корзину
               </Button>
             ) : null}
-            {user?.role === 'CUSTOMER' && qtyInCart > 0 ? (
+            {user && qtyInCart > 0 ? (
               <div className="mt-2 flex items-center justify-center gap-3" data-testid="details-qty-control">
                 <Button
                   type="button"
@@ -85,8 +85,8 @@ export default function ProductDetailsPage() {
                 </Button>
               </div>
             ) : null}
-            {user?.role !== 'CUSTOMER' ? (
-              <div className="mt-3 text-xs text-muted-foreground">Покупка доступна только пользователям с ролью «Покупатель».</div>
+            {!user ? (
+              <div className="mt-3 text-xs text-muted-foreground">Чтобы добавлять товары в корзину, нужно авторизоваться.</div>
             ) : null}
           </div>
         </CardContent>

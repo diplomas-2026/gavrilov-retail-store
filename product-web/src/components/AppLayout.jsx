@@ -13,6 +13,7 @@ export default function AppLayout() {
   const canManage = user && ['ADMIN', 'MANAGER'].includes(user.role);
   const isAdmin = user?.role === 'ADMIN';
   const isCustomer = user?.role === 'CUSTOMER';
+  const canUseCustomerFeatures = Boolean(user);
   const roleLabel = user?.role === 'ADMIN'
     ? 'Администратор'
     : user?.role === 'MANAGER'
@@ -26,8 +27,8 @@ export default function AppLayout() {
   const topNav = [
     { to: '/', label: 'Каталог', icon: LayoutGrid, show: true },
     { to: '/pickup-points', label: 'Пункты выдачи', icon: MapPin, show: true },
-    { to: '/cart', label: 'Корзина', icon: ShoppingCart, show: isCustomer },
-    { to: '/profile/orders', label: 'Мои заказы', icon: ClipboardList, show: isCustomer },
+    { to: '/cart', label: 'Корзина', icon: ShoppingCart, show: canUseCustomerFeatures },
+    { to: '/profile/orders', label: 'Мои заказы', icon: ClipboardList, show: canUseCustomerFeatures },
     { to: '/admin', label: 'Управление', icon: Shield, show: canManage }
   ].filter((item) => item.show);
 

@@ -8,14 +8,14 @@ export function CartProvider({ children }) {
   const { user, token } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const isCustomer = user?.role === 'CUSTOMER';
+  const canUseCart = Boolean(user);
 
   const syncFromResponse = (response) => {
     setItems(response?.items || []);
   };
 
   useEffect(() => {
-    if (!token || !isCustomer) {
+    if (!token || !canUseCart) {
       setItems([]);
       return;
     }
@@ -26,10 +26,10 @@ export function CartProvider({ children }) {
       .then(syncFromResponse)
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, [token, isCustomer]);
+  }, [token, canUseCart]);
 
   const addToCart = async (product) => {
-    if (!isCustomer) {
+    if (!canUseCart) {
       return;
     }
     const existing = items.find((item) => item.productId === product.id);
@@ -44,7 +44,7 @@ export function CartProvider({ children }) {
   };
 
   const updateQty = async (productId, qty) => {
-    if (!isCustomer) {
+    if (!canUseCart) {
       return;
     }
     const numericQty = Number(qty);
@@ -62,7 +62,7 @@ export function CartProvider({ children }) {
   };
 
   const removeItem = async (productId) => {
-    if (!isCustomer) {
+    if (!canUseCart) {
       return;
     }
     const response = await api.removeCartItem(productId);
@@ -70,7 +70,7 @@ export function CartProvider({ children }) {
   };
 
   const clear = async () => {
-    if (!isCustomer) {
+    if (!canUseCart) {
       setItems([]);
       return;
     }

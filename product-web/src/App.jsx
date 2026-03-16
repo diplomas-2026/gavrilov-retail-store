@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import RoleRoute from './components/RoleRoute';
 import AssistantWidget from './components/AssistantWidget';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -35,9 +34,7 @@ export default function App() {
             path="cart"
             element={
               <ProtectedRoute>
-                <RoleRoute roles={['CUSTOMER']}>
-                  <CartPage />
-                </RoleRoute>
+                <CartPage />
               </ProtectedRoute>
             }
           />
@@ -45,9 +42,7 @@ export default function App() {
             path="checkout"
             element={
               <ProtectedRoute>
-                <RoleRoute roles={['CUSTOMER']}>
-                  <CheckoutPage />
-                </RoleRoute>
+                <CheckoutPage />
               </ProtectedRoute>
             }
           />
@@ -55,9 +50,7 @@ export default function App() {
             path="profile/orders"
             element={
               <ProtectedRoute>
-                <RoleRoute roles={['CUSTOMER']}>
-                  <MyOrdersPage />
-                </RoleRoute>
+                <MyOrdersPage />
               </ProtectedRoute>
             }
           />
@@ -65,9 +58,7 @@ export default function App() {
             path="profile/orders/:id"
             element={
               <ProtectedRoute>
-                <RoleRoute roles={['CUSTOMER']}>
-                  <OrderDetailsPage />
-                </RoleRoute>
+                <OrderDetailsPage />
               </ProtectedRoute>
             }
           />

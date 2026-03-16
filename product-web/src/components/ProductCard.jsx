@@ -11,7 +11,7 @@ import { ShoppingCart } from 'lucide-react';
 export default function ProductCard({ product }) {
   const { user } = useAuth();
   const { items, addToCart, updateQty } = useCart();
-  const canBuy = user?.role === 'CUSTOMER';
+  const canBuy = Boolean(user);
   const itemInCart = items.find((item) => item.productId === product.id);
   const qtyInCart = itemInCart?.qty || 0;
   const canIncrease = qtyInCart < Number(product.stockQty);
