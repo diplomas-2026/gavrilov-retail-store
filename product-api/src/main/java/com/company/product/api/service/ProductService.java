@@ -32,11 +32,13 @@ public class ProductService {
         this.productImageRepository = productImageRepository;
     }
 
-    public List<ProductResponse> search(String query,
-                                        Long categoryId,
-                                        BigDecimal minPrice,
-                                        BigDecimal maxPrice,
-                                        boolean activeOnly) {
+    public List<ProductResponse> search(
+            String query,
+            Long categoryId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            boolean activeOnly
+    ) {
         Specification<ProductEntity> spec = Specification.where(null);
 
         if (query != null && !query.isBlank()) {
