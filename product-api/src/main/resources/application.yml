@@ -27,7 +27,7 @@ spring:
         scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
         unsafe-ssl: ${GIGACHAT_UNSAFE_SSL:true}
         bearer:
-          api-key: ${GIGACHAT_API_KEY:}
+          api-key: MDE5ZTQzZWMtYzczYi03YmZmLWFiNDgtOGE5NGUwMTgxNTA1OjU4NDY5MzI0LTBiM2QtNDViNC04MjcwLWIxNWU1YmRmZjNiYw==
   jpa:
     hibernate:
       ddl-auto: validate
