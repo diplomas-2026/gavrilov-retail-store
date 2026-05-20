@@ -1,20 +1,4 @@
 services:
-  postgres:
-    image: postgres:16
-    container_name: gavrilov-postgres
-    environment:
-      POSTGRES_DB: gavrilov_store
-      POSTGRES_USER: gavrilov
-      POSTGRES_PASSWORD: gavrilov
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gavrilov -d gavrilov_store"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
   api:
     build:
